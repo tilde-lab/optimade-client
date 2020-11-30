@@ -1,13 +1,14 @@
 {
   "name": "optimade",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.1",
+  "description": "Enhanced Optimade client",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "scripts": {
     "build": "npm run lint && rollup --config",
     "lint": "tslint -c tslint.json \"src/**/*.ts\"",
     "lint:fix": "tslint --fix -c tslint.json \"src/**/*.ts\"",
+    "prepublishOnly": "npm run lint && npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Pavel Malyshev",
