@@ -8,9 +8,10 @@ export { Types };
 export class Optimade {
     private providersUrl: string = '';
     private corsProxyUrl: string = '';
-    private providers: Types.ProvidersMap = {};
-    private apis: Types.ApisMap = {};
+    public providers: Types.ProvidersMap | null = null;
+    public apis: Types.ApisMap = {};
     private reqStack: string[] = [];
+
     constructor({ providersUrl = '', corsProxyUrl = '' }) {
         this.corsProxyUrl = corsProxyUrl;
         this.providersUrl = this.wrapUrl(providersUrl);
@@ -23,15 +24,18 @@ export class Optimade {
         );
 
         if (!providers) return null;
+        if (!this.providers) this.providers = {};
 
         const data = providers.data.filter(Optimade.isProviderValid);
-        const ver = providers?.meta?.api_version?.charAt(0);
+        const ver = providers.meta && providers.meta.api_version ?
+            providers.meta.api_version.charAt(0) : '';
 
         for (const provider of data) {
             if (!this.apis[provider.id]) this.apis[provider.id] = [];
             try {
                 const api = await this.getApis(provider, ver ? `v${ver}` : '');
                 if (!api) continue;
+
                 if (api.attributes.available_endpoints.includes('structures')) {
                     this.apis[provider.id].push(api);
                     if (!this.providers[provider.id]) {
@@ -46,7 +50,13 @@ export class Optimade {
         return this.providers;
     }
 
-    async getApis(provider: Types.Provider, version: string = ''): Promise<Types.Api | null> {
+    async getApis(provider: Types.Provider | string, version: string = ''): Promise<Types.Api | null> {
+        if (typeof provider === 'string') {
+            provider = this.providers[provider];
+        }
+
+        if (!provider) throw new Error('No provider found');
+
         const url: string = this.wrapUrl(`${provider.attributes.base_url}/${version}`, '/info');
 
         if (this.isDuplicatedReq(url)) return null;
@@ -55,11 +65,11 @@ export class Optimade {
         return Optimade.apiVersion(apis);
     }
 
-    async getStructures(provider: Types.Provider, filter: string = ''): Promise<Types.Structure[] | null> {
+    async getStructures(providerId: string, filter: string = ''): Promise<Types.Structure[] | null> {
 
-        if (!this.apis[provider.id] || !filter) return null;
+        if (!this.apis[providerId] || !filter) return null;
 
-        const apis = this.apis[provider.id].filter(api => api.attributes.available_endpoints.includes('structures'));
+        const apis = this.apis[providerId].filter(api => api.attributes.available_endpoints.includes('structures'));
 
         const structures: Types.StructuresResponse[] = await allSettled(apis.map((api: Types.Api) => {
             const url: string = this.wrapUrl(Optimade.apiVersionUrl(api), `/structures?filter=${filter}`);
@@ -71,11 +81,17 @@ export class Optimade {
         }, []);
     }
 
-    async getStructuresAll(providers: Types.Provider[], filter: string = ''): Promise<[Promise<Types.Structure>, Promise<Types.Provider>][][]> {
-        return Promise.all(providers.map(provider => allSettled([
-            this.getStructures(provider, filter),
-            Promise.resolve(provider)
-        ])));
+    async getStructuresAll(providerIds: string[], filter: string = ''): Promise<[Promise<Types.Structure>, Promise<Types.Provider>][][]> {
+        return Promise.all(providerIds.reduce((structures: Promise<any>[], providerId: string) => {
+            const provider = this.providers[providerId];
+            if (provider) {
+                structures.push(allSettled([
+                    this.getStructures(providerId, filter),
+                    Promise.resolve(provider)
+                ]));
+            }
+            return structures;
+        }, []));
     }
 
     private async followLinks(api: Types.Api): Promise<Types.LinksResponse | null> {

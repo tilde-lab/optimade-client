@@ -35,11 +35,13 @@ const optimadeClient = new Optimade({
     providersUrl: '/path/to/optimade/providers.json'
 });
 
-const providersMap = await optimadeClient.getProviders();
+const providersMap = await optimadeClient.getProviders(); // { [id: string]: Provider }[]
 
-const providerArray = Object.values(providersMap);
+console.log(optimadeClient.providers); // { [id: string]: Provider }[]
 
-const results = await optimadeClient.getStructuresAll(providerArray, filter);
+const providerIds = Object.keys(providersMap); // string[]
+
+const results = await optimadeClient.getStructuresAll(providerIds, filter); // [Structures[], Provider][]
 ```
 
 ## License
