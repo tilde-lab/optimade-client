@@ -46,6 +46,8 @@ const providerIds = Object.keys(providersMap); // string[]
 const results = await optimadeClient.getStructuresAll(providerIds, YOUR_OPTIMADE_QUERY); // [Structures[], Provider][]
 ```
 
+Note the `Optimade` class constructor accepts also the `corsProxyUrl` parameter making sense for the [browser environment](https://github.com/tilde-lab/optimade.science/blob/master/src/services/optimade.ts). This will be valid until all the Optimade providers are supplying the header `Access-Control-Allow-Origin $http_origin` in their responses. For the server-side environment this is not required.
+
 ## License
 
 MIT &copy; [PaulMaly](https://github.com/PaulMaly), Tilde Materials Informatics
