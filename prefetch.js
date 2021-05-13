@@ -1,4 +1,7 @@
+#!/usr/bin/env node
+
 const fs = require('fs');
+const path = require('path');
 const { Optimade } = require('./dist/index');
 
 const optimade = new Optimade({
@@ -11,8 +14,10 @@ optimade.getProviders().then(() => {
         providers: optimade.providers,
         apis: optimade.apis,
     };
-    fs.writeFile('./dist/prefetched.json', JSON.stringify(data), (err) => {
+
+    fs.writeFile(path.join(__dirname, 'dist/prefetched.json'), JSON.stringify(data), (err) => {
         if (err) throw err;
-        console.log('The file has been saved!');
+        console.log('The cache file has been saved!');
     });
-})
+
+});
