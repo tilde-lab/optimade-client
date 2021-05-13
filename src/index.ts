@@ -1,6 +1,5 @@
-import 'isomorphic-unfetch';
 
-import { allSettled } from './utils';
+import { allSettled, fetchWithTimeout } from './utils';
 
 import type * as Types from './types';
 export { Types };
@@ -12,7 +11,7 @@ export class Optimade {
     public apis: Types.ApisMap = {};
     private reqStack: string[] = [];
 
-    constructor({ providersUrl = '', corsProxyUrl = '' }) {
+    constructor({ providersUrl = '', corsProxyUrl = '' } : {providersUrl?: string; corsProxyUrl?: string} = {} ) {
         this.corsProxyUrl = corsProxyUrl;
         this.providersUrl = this.wrapUrl(providersUrl);
     }
@@ -23,7 +22,7 @@ export class Optimade {
             Optimade.getJSON(this.providersUrl).catch(() => null)
         );
 
-        if (!providers) return null;
+        if (!providers) throw new Error('No providers set');
         if (!this.providers) this.providers = {};
 
         const data = providers.data.filter(Optimade.isProviderValid);
@@ -67,16 +66,17 @@ export class Optimade {
 
     async getStructures(providerId: string, filter: string = ''): Promise<Types.Structure[] | null> {
 
-        if (!this.apis[providerId] || !filter) return null;
+        if (!this.apis[providerId]) return null;
 
         const apis = this.apis[providerId].filter(api => api.attributes.available_endpoints.includes('structures'));
 
         const structures: Types.StructuresResponse[] = await allSettled(apis.map((api: Types.Api) => {
-            const url: string = this.wrapUrl(Optimade.apiVersionUrl(api), `/structures?filter=${filter}`);
+            const url: string = this.wrapUrl(Optimade.apiVersionUrl(api), filter ? `/structures?filter=${filter}` : '/structures');
             return Optimade.getJSON(url);
         }));
 
         return structures.reduce((structures: Types.Structure[], structure: Types.StructuresResponse | null) => {
+            //console.log('Ready ' + providerId);
             return structure ? structures.concat(structure.data) : structures;
         }, []);
     }
@@ -85,6 +85,7 @@ export class Optimade {
         return Promise.all(providerIds.reduce((structures: Promise<any>[], providerId: string) => {
             const provider = this.providers[providerId];
             if (provider) {
+                //console.log('Starting ' + providerId);
                 structures.push(allSettled([
                     this.getStructures(providerId, filter),
                     Promise.resolve(provider)
@@ -114,12 +115,13 @@ export class Optimade {
     static async getJSON(uri: string, params: {} = null, headers: {} = {}) {
 
         const url = new URL(uri);
+        const timeout = 5000;
 
         if (params) {
             Object.entries(params).forEach((param: [string, any]) => url.searchParams.append(...param));
         }
 
-        const res = await fetch(url.toString(), { headers });
+        const res = await fetchWithTimeout(url.toString(), { headers }, timeout);
 
         if (!res.ok) {
             const err: Types.ResponseError = new Error(res.statusText);
