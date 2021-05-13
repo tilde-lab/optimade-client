@@ -1,7 +1,7 @@
 {
   "name": "optimade",
-  "version": "1.1.1",
-  "description": "Enhanced Optimade client",
+  "version": "1.1.2",
+  "description": "Aggregating Optimade client for the online materials databases",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -18,7 +18,7 @@
   "devDependencies": {
     "@types/jest": "^26.0.15",
     "jest": "^26.6.0",
-    "rollup": "^2.32.1",
+    "rollup": "^2.47.0",
     "rollup-plugin-typescript2": "^0.28.0",
     "ts-jest": "^26.4.1",
     "tslint": "^6.1.3",
