@@ -22,7 +22,7 @@ export class Optimade {
             Optimade.getJSON(this.providersUrl).catch(() => null)
         );
 
-        if (!providers) throw new Error('No providers set');
+        if (!providers) return null;
         if (!this.providers) this.providers = {};
 
         const data = providers.data.filter(Optimade.isProviderValid);
