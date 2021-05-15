@@ -5,7 +5,7 @@
 ## Features
 
 - discover all the [official Optimade databases](https://providers.optimade.org) recursively
-- cache the discovered list for future and boost the retrieval performance
+- cache the discovered list (`prefetched.json`) for future and boost the retrieval performance
 - query them all, in the browser, at the server, everywhere
 
 ## Install
@@ -18,7 +18,7 @@ npm i optimade --save
 yarn add optimade
 ```
 
-CDN: [UNPKG](https://unpkg.com/optimade/) | [jsDelivr](https://cdn.jsdelivr.net/npm/optimade/) (available as `window.Optimade`)
+CDN: [UNPKG](https://unpkg.com/optimade/) | [jsDelivr](https://cdn.jsdelivr.net/npm/optimade/) (available as `window.optimade`)
 
 If you are **not** using es6 or CDN, add to your HTML just before closing the `body` tag:
 
@@ -31,7 +31,6 @@ If you are **not** using es6 or CDN, add to your HTML just before closing the `b
 ## Usage
 
 ```javascript
-import { Optimade } from 'optimade';
 
 const optimadeClient = new Optimade({
     providersUrl: '/path/to/optimade/providers.json'
@@ -46,7 +45,9 @@ const providerIds = Object.keys(providersMap); // string[]
 const results = await optimadeClient.getStructuresAll(providerIds, YOUR_OPTIMADE_QUERY); // [Structures[], Provider][]
 ```
 
-Note the `Optimade` class constructor accepts also the `corsProxyUrl` parameter making sense for the [browser environment](https://github.com/tilde-lab/optimade.science/blob/master/src/services/optimade.ts). This will be valid until all the Optimade providers are supplying the header `Access-Control-Allow-Origin $http_origin` in their responses. For the server-side environment this is not required.
+Importing depends on your environment. See also the `examples` folder. The `.html` examples are suited for the browser environment, the `.js` examples are suited for the server environment.
+
+The code is generally isomorphic, however one should additionally take care of downloading the cache or setting the CORS policy for the browsers. Concerning the CORS, the `Optimade` class constructor accepts the `corsProxyUrl` parameter, pointing to _e.g._  a running `cors-anywhere` proxy instance. This will be valid until all the Optimade providers are supplying the header `Access-Control-Allow-Origin $http_origin` in their responses. For the server-side environment this is not required.
 
 ## License
 
