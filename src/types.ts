@@ -3,6 +3,8 @@ export interface Meta {
     query: {
         representation: string;
     };
+    data_returned: number;
+    data_available: number;
     more_data_available: boolean;
     implementation?: {
         maintainer: {

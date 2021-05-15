@@ -72,11 +72,12 @@ export class Optimade {
 
         const structures: Types.StructuresResponse[] = await allSettled(apis.map((api: Types.Api) => {
             const url: string = this.wrapUrl(Optimade.apiVersionUrl(api), filter ? `/structures?filter=${filter}` : '/structures');
+            // TODO pagination e.g. url += (filter ? '&' : '?') + 'page_limit=100'
             return Optimade.getJSON(url);
         }));
 
+        //console.log('Ready ' + providerId);
         return structures.reduce((structures: Types.Structure[], structure: Types.StructuresResponse | null) => {
-            //console.log('Ready ' + providerId);
             return structure ? structures.concat(structure.data) : structures;
         }, []);
     }
@@ -104,7 +105,7 @@ export class Optimade {
     }
 
     private wrapUrl(url, tail = '') {
-        url = this.corsProxyUrl ? `${this.corsProxyUrl}/${url.replace('://', '/')}` : url;
+        url = this.corsProxyUrl ? `${this.corsProxyUrl}/${url.replace('://', '/').replace('//', '/')}` : url;
         return tail ? url.replace(/\/$/, '') + tail : url;
     }
 
@@ -115,7 +116,7 @@ export class Optimade {
     static async getJSON(uri: string, params: {} = null, headers: {} = {}) {
 
         const url = new URL(uri);
-        const timeout = 5000;
+        const timeout = 10000;
 
         if (params) {
             Object.entries(params).forEach((param: [string, any]) => url.searchParams.append(...param));

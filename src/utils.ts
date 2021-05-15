@@ -13,6 +13,8 @@ export function fetchWithTimeout( url, args, timeout ): any {
             timeout
         );
 
+        //console.log('Fetching ' + url);
+
         fetch( url, args ).then(
             response => resolve( response ),
             err => reject( err )
