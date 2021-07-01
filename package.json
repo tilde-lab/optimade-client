@@ -1,6 +1,6 @@
 {
   "name": "optimade",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Aggregating Optimade client for the online materials databases",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
