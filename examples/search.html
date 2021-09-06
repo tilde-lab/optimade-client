@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta charset="utf-8" />
+</head>
+<body>
+<script type="text/javascript" src="/dist/index.js"></script>
+<script type="module">
+"use strict";
+
+const optimadeClient = new optimade.Optimade({corsProxyUrl: 'https://cors.optimade.science'});
+
+fetch('/dist/prefetched.json').then(response => response.json()).then(prefetched => {
+
+    optimadeClient.providers = prefetched.providers;
+    optimadeClient.apis = prefetched.apis;
+
+    optimadeClient.getStructuresAll(['mp', 'mpds'], 'chemical_formula_anonymous="A2B"').then(results => {
+        console.dir(results, {depth: null});
+    });
+
+}).catch(console.error);
+
+</script>
+</body>
+</html>

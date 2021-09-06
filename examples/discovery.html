@@ -8,7 +8,9 @@
 <script type="module">
 "use strict";
 
-const optimadeClient = new optimade.Optimade({providersUrl: 'https://providers.optimade.org/providers.json', corsProxyUrl: 'https://cors.optimade.org'});
+const optimadeClient = new optimade.Optimade({providersUrl: 'https://providers.optimade.org/providers.json', corsProxyUrl: 'https://cors.optimade.science'});
+
+console.warn('Starting discovery...');
 
 optimadeClient.getProviders().then(async data => {
 

@@ -4,6 +4,8 @@ const { Optimade } = require('./../dist/index');
 
 const optimadeClient = new Optimade({providersUrl: 'https://providers.optimade.org/providers.json'});
 
+console.warn('Starting discovery...');
+
 optimadeClient.getProviders().then(async data => {
 
     let providers = Object.keys(optimadeClient.providers),
