@@ -5,20 +5,21 @@ export function allSettled(promises: Promise<any>[], catcher = () => null) {
     return Promise.all(promises.map(promise => promise.catch(catcher)));
 }
 
-export function fetchWithTimeout( url, args, timeout ): any {
-    return new Promise( (resolve, reject) => {
+export async function fetchWithTimeout(url, options = {}, timeout = 5000): Promise<Response> {
 
-        const timer = setTimeout(
-            () => reject( new Error('Request timed out') ),
-            timeout
-        );
+    const ac = new AbortController();
+    const signal = ac.signal;
 
-        //console.log('Fetching ' + url);
+    const timer = setTimeout(() => ac.abort(), timeout);
 
-        fetch( url, args ).then(
-            response => resolve( response ),
-            err => reject( err )
-        ).finally( () => clearTimeout(timer) );
-
-    })
+    try {
+        return await fetch(url, { ...options, signal });
+    } catch(err) {
+        if (err.name === 'AbortError') {
+            throw new Error('Request timed out');
+        }
+        throw err;
+    } finally {
+        clearTimeout(timer);
+    }
 }

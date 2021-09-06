@@ -1,12 +1,12 @@
 # Aggregating Optimade client for the online materials databases
 
-[![NPM version](https://img.shields.io/npm/v/optimade.svg?style=flat)](https://www.npmjs.com/package/optimade) [![NPM downloads](https://img.shields.io/npm/dm/optimade.svg?style=flat)](https://www.npmjs.com/package/optimade)
+[![NPM version](https://img.shields.io/npm/v/optimade.svg?style=flat)](https://www.npmjs.com/package/optimade) [![NPM downloads](https://img.shields.io/npm/dm/optimade.svg?style=flat)](https://www.npmjs.com/package/optimade) [![GitHub issues](https://img.shields.io/github/issues/tilde-lab/optimade-client?style=flat)](https://github.com/tilde-lab/optimade-client/issues)
 
 ## Features
 
-- discover all the [official Optimade databases](https://providers.optimade.org) recursively
-- cache the discovered list (`prefetched.json`) for future and boost the retrieval performance
-- query them all, in the browser, at the server, everywhere
+- discovers all the [official Optimade databases](https://providers.optimade.org) recursively
+- caches the discovered list (`prefetched.json`) for future and boosts the retrieval performance
+- queries them all, in the browser, at the server, everywhere
 
 ## Install
 
