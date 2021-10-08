@@ -104,3 +104,5 @@ export interface ResponseError extends Error {
 
 export type ProvidersMap = { [key: string]: Provider }
 export type ApisMap = { [key: string]: Api[] }
+
+export type StructuresResult = [Promise<Structure>, Promise<Provider>][][];
