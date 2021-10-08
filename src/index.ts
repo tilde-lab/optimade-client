@@ -82,18 +82,20 @@ export class Optimade {
         }, []);
     }
 
-    async getStructuresAll(providerIds: string[], filter: string = ''): Promise<[Promise<Types.Structure>, Promise<Types.Provider>][][]> {
-        return Promise.all(providerIds.reduce((structures: Promise<any>[], providerId: string) => {
+    getStructuresAll(providerIds: string[], filter: string = '', batch: boolean = true): Promise<Promise<Types.StructuresResult>[]> | Promise<Types.StructuresResult>[] {
+        
+        const results = providerIds.reduce((structures: Promise<any>[], providerId: string) => {
             const provider = this.providers[providerId];
             if (provider) {
-                //console.log('Starting ' + providerId);
                 structures.push(allSettled([
                     this.getStructures(providerId, filter),
                     Promise.resolve(provider)
                 ]));
             }
             return structures;
-        }, []));
+        }, []);
+
+        return batch ? Promise.all(results) : results;
     }
 
     private async followLinks(api: Types.Api): Promise<Types.LinksResponse | null> {
