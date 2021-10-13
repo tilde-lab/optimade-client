@@ -58,6 +58,7 @@ export interface Provider {
         base_url: string | null;
         homepage?: string | null;
         link_type?: string;
+        max_limit?: string;
     };
 }
 
