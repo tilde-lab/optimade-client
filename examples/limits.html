@@ -135,7 +135,7 @@
 
         function getAllProviders() {
             code.innerText = '...loading'
-            fetch('/dist/prefetched.json').then(response => response.json()).then(prefetched => {
+            fetch('../dist/prefetched.json').then(response => response.json()).then(prefetched => {
 
                 optimadeClient.providers = prefetched.providers;
                 optimadeClient.apis = prefetched.apis;
