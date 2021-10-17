@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <style>
+        body {
+            font-family: system-ui;
+        }
+
+        nav {
+            display: flex;
+        }
+
+        pre {
+            max-width: 100vw;
+            overflow: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <form onsubmit="getProvider(select.value, input.value, selectPage.value || 1)">
+            <fieldset>
+                <legend>Select provider</legend>
+                <input placeholder="type formula" />
+                <select id="providers"></select>
+                <select id="pages"></select>
+                <button>get provider</button>
+            </fieldset>
+        </form>
+        <fieldset>
+            <legend>Select all providers</legend>
+            <button onclick="getAllProviders()">get providers</button>
+        </fieldset>
+
+    </nav>
+    <h2>Result:</h2>
+    <pre>
+        <code>click some button</code>
+    </pre>
+
+    <script type="text/javascript" src="/dist/index.js"></script>
+    <script>
+        "use strict";
+        const optimadeClient = new optimade.Optimade({ corsProxyUrl: 'https://cors.optimade.science' });
+
+        let response = {}, pages = 0
+        const providers = [
+            '2dstructures',
+            '2dtopo',
+            'cod',
+            'curated-cofs',
+            'li-ion-conductors',
+            'mp',
+            'mpds',
+            'nmd',
+            'odbx',
+            'optimade-sample',
+            'pyrene-mofs',
+            'scdm',
+            'sssp',
+            'stoceriaitf',
+            'tc-applicability',
+            'tcod',
+            'threedd',
+            'tin-antimony-sulfoiodide',
+            'twodmatpedia'
+        ],
+            code = document.querySelector('code'),
+            input = document.querySelector('input'),
+            select = document.querySelector('#providers'),
+            selectPage = document.querySelector('#pages'),
+            options = providers.map(p => {
+                const option = document.createElement('option')
+                option.value = p
+                option.innerText = p
+                return option
+            })
+        select.append(...options)
+
+        function selecting() {
+            console.log(select.value)
+        }
+
+        input.value = 'chemical_formula_anonymous="A2B"'
+        input.size = input.value.length - 5;
+        function inputing() {
+            console.log(input.value)
+        }
+
+        function getProvider(provider, filter, page) {
+            event.preventDefault()
+            code.innerText = '...loading'
+            fetch('/dist/prefetched.json').then(response => response.json()).then(prefetched => {
+
+                optimadeClient.providers = prefetched.providers;
+                optimadeClient.apis = prefetched.apis;
+
+                optimadeClient.getProviderStructures(provider, filter, page).then(result => {
+                    console.dir(result);
+                    response = result
+                    pages = () => {
+                        if (result.meta.provider.prefix === 'mpds')
+                            return Math.trunc(result.meta.data_available / result.meta.data_returned)
+                        else
+                            return Math.trunc(result.meta.data_returned / 100)
+                    }
+                    const pagesOptions = [...Array(pages()).keys()].map(p => {
+                        const option = document.createElement('option')
+                        option.value = p
+                        option.innerText = p
+                        return option
+                    })
+                    selectPage.append(...pagesOptions)
+
+                    if (result) {
+                        const { meta, data, links } = result
+                        const structures = {
+                            provider: meta.provider,
+                            data: data.length,
+                            data_available: meta.data_available,
+                            data_returned: meta.data_returned,
+                            more_data_available: meta.more_data_available,
+                            query: meta.query,
+                            links: links
+                        }
+                        code.innerText = JSON.stringify(structures, 0, 2)
+                    } else code.innerText = 'null'
+                });
+
+            }).catch(console.error);
+        }
+
+        function getAllProviders() {
+            code.innerText = '...loading'
+            fetch('/dist/prefetched.json').then(response => response.json()).then(prefetched => {
+
+                optimadeClient.providers = prefetched.providers;
+                optimadeClient.apis = prefetched.apis;
+
+                optimadeClient.getAllProvidersStructures([...providers], 'chemical_formula_anonymous="A2B"').then(results => {
+                    console.dir(results);
+                    const structures = results && results.map(r => {
+                        if (r) {
+                            const { meta, data, links } = r
+                            const provider = {
+                                provider: meta.provider,
+                                data: data.length,
+                                data_available: meta.data_available,
+                                data_returned: meta.data_returned,
+                                more_data_available: meta.more_data_available,
+                                links: links
+                            }
+                            return provider
+                        }
+                    })
+                    code.innerText = JSON.stringify(structures, 0, 2)
+                });
+
+            }).catch(console.error);
+        }
+
+    </script>
+</body>
+
+</html>

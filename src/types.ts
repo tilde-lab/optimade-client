@@ -38,8 +38,8 @@ export interface ApiVer {
 }
 
 export interface Api {
-    type: string;
     id: string;
+    type: string;
     attributes: {
         api_version: string;
         available_api_versions: ApiVer | ApiVer[];
@@ -58,7 +58,7 @@ export interface Provider {
         base_url: string | null;
         homepage?: string | null;
         link_type?: string;
-        max_limit?: string;
+        query_limits?: number[];
     };
 }
 
@@ -88,7 +88,7 @@ export interface InfoResponse {
 }
 
 export interface StructuresResponse {
-    data: Structure[];
+    data?: Structure[];
     links?: Links;
     meta?: Meta;
 }
@@ -103,5 +103,5 @@ export interface ResponseError extends Error {
     response?: any;
 }
 
-export type ProvidersMap = { [key: string]: Provider }
-export type ApisMap = { [key: string]: Api[] }
+export type ProvidersMap = { [key: string]: Provider; };
+export type ApisMap = { [key: string]: Api[]; };

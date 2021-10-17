@@ -10,14 +10,19 @@ const optimade = new Optimade({
 
 optimade.getProviders().then(async () => {
 
-	const providers = optimade.providers;
-	const apis = optimade.apis;
+	const filteredApis = Object.entries(optimade.apis).filter(([k, v]) => v.length);
+	const apis = filteredApis.sort().reduce((acc, [k, v]) => {
+		if (v.length > 0) {
+			// const { id, type, attributes } = v[0];
+			return { ...acc, ...{ [k]: v } };
+		}
+	}, {});
 
 	async function getQueryLimits(providers, filter = 'oqmd.org', max = 5000) {
-		const filtered = Object.entries(providers).filter(([k, v]) => !v.attributes.base_url.includes(filter));
+		const filteredProviders = Object.entries(providers).filter(([k, v]) => !v.attributes.base_url.includes(filter));
 
 		const fetchLimits = async (k, v) => {
-			const url = `${v.attributes.base_url}/v1/structures?filter=nelements=2&page_limit=${max}`;
+			const url = `${v.attributes.base_url}/v1/structures?filter=chemical_formula_anonymous="A2B"&page_limit=${max}`;
 			try {
 				const res = await fetch(url).then(res => res.json());
 				const detail = (e) => {
@@ -36,18 +41,19 @@ optimade.getProviders().then(async () => {
 			}
 		};
 
-		providers = await filtered.reduce(async (promise, [k, v]) => {
+		providers = await filteredProviders.sort().reduce(async (promise, [k, v]) => {
 			const provider = await fetchLimits(k, v);
 			const acc = await promise;
 			return { ...acc, ...provider };
 		}, Promise.resolve({}));
 
-		console.log('providers:', providers);
-		return providers;
+		const keys = Object.keys(providers);
+
+		return { keys, providers };
 	}
 
-	getQueryLimits(providers).then(providers => {
-		const data = { providers, apis };
+	getQueryLimits(optimade.providers).then(providers => {
+		const data = { ...providers, apis };
 		fs.writeFile(path.join(__dirname, 'dist/prefetched.json'), JSON.stringify(data), (err) => {
 			if (err) throw err;
 			console.log('The cache file has been saved!');
