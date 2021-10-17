@@ -41,7 +41,7 @@
         <code>click some button</code>
     </pre>
 
-    <script type="text/javascript" src="/dist/index.js"></script>
+    <script type="text/javascript" src="../dist/index.js"></script>
     <script>
         "use strict";
         const optimadeClient = new optimade.Optimade({ corsProxyUrl: 'https://cors.optimade.science' });
@@ -93,7 +93,7 @@
         function getProvider(provider, filter, page) {
             event.preventDefault()
             code.innerText = '...loading'
-            fetch('/dist/prefetched.json').then(response => response.json()).then(prefetched => {
+            fetch('../dist/prefetched.json').then(response => response.json()).then(prefetched => {
 
                 optimadeClient.providers = prefetched.providers;
                 optimadeClient.apis = prefetched.apis;
