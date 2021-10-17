@@ -26,7 +26,7 @@
             <fieldset>
                 <legend>Select provider</legend>
                 <input placeholder="type formula" />
-                <select id="providers"></select>
+                <select id="providers" onchange="selecting()"></select>
                 <select id="pages"></select>
                 <button>get provider</button>
             </fieldset>
@@ -47,7 +47,6 @@
         "use strict";
         const optimadeClient = new optimade.Optimade({ corsProxyUrl: 'https://cors.optimade.science' });
 
-        let response = {}, pages = 0
         const providers = [
             '2dstructures',
             '2dtopo',
@@ -83,8 +82,8 @@
 
         function selecting() {
             console.log(select.value)
+            selectPage.innerHTML = ''
         }
-
         input.value = 'chemical_formula_anonymous="A2B"'
         input.size = input.value.length - 5;
         function inputing() {
@@ -101,22 +100,25 @@
 
                 optimadeClient.getProviderStructures(provider, filter, page).then(result => {
                     console.dir(result);
-                    response = result
-                    pages = () => {
-                        if (result.meta.provider.prefix === 'mpds')
-                            return Math.trunc(result.meta.data_available / result.meta.data_returned)
-                        else
-                            return Math.trunc(result.meta.data_returned / 100)
-                    }
-                    const pagesOptions = [...Array(pages()).keys()].map(p => {
-                        const option = document.createElement('option')
-                        option.value = p
-                        option.innerText = p
-                        return option
-                    })
-                    selectPage.append(...pagesOptions)
 
-                    if (result) {
+                    function setSelectPage(result) {
+                        const pages = () => {
+                            if (result.meta.provider.prefix === 'mpds')
+                                return Math.trunc(result.meta.data_available / result.meta.data_returned)
+                            else
+                                return Math.trunc(result.meta.data_returned / 100)
+                        }
+                        const pagesOptions = [...Array(pages()).keys()].map(p => {
+                            const option = document.createElement('option')
+                            option.value = p
+                            option.innerText = p
+                            return option
+                        })
+                        selectPage.append(...pagesOptions)
+                    }
+
+                    if (result !== null) {
+                        setSelectPage(result)
                         const { meta, data, links } = result
                         const structures = {
                             provider: meta.provider,
