@@ -4,6 +4,10 @@ const fs = require('fs');
 const path = require('path');
 const { Optimade } = require('./dist/index');
 
+const { AbortController } = require('node-abort-controller');
+
+global.AbortController = AbortController;
+
 const optimade = new Optimade({
 	providersUrl: 'https://providers.optimade.org/providers.json'
 });
