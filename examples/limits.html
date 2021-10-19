@@ -22,10 +22,10 @@
 <body>
     <h1>Get providers structures by query_limit demo</h1>
     <nav>
-        <form onsubmit="getProvider(select.value, input.value, selectPage.value || 1)">
+        <form onsubmit="getProvider(selectProvider.value, inputFilter.value, selectPage.value || 0)">
             <fieldset>
                 <legend>Select provider</legend>
-                <input placeholder="type formula" />
+                <input id="filter" placeholder="type formula" />
                 <select id="providers" onchange="selecting()"></select>
                 <select id="pages"></select>
                 <button>get provider</button>
@@ -33,7 +33,9 @@
         </form>
         <fieldset>
             <legend>Select all providers</legend>
-            <button onclick="getAllProviders()">get providers</button>
+            <button
+                onclick="getAllProviders(Object.keys(optimadeClient.providers), inputFilter.value, selectPage.value || 0)">get
+                providers</button>
         </fieldset>
 
     </nav>
@@ -46,68 +48,48 @@
     <script>
         "use strict";
         const optimadeClient = new optimade.Optimade({ corsProxyUrl: 'https://cors.optimade.science' });
+        const inputFilter = document.querySelector('input')
+        const selectProvider = document.querySelector('#providers')
+        const selectPage = document.querySelector('#pages')
+        const code = document.querySelector('code')
 
-        const providers = [
-            '2dstructures',
-            '2dtopo',
-            'cod',
-            'curated-cofs',
-            'li-ion-conductors',
-            'mp',
-            'mpds',
-            'nmd',
-            'odbx',
-            'optimade-sample',
-            'pyrene-mofs',
-            'scdm',
-            'sssp',
-            'stoceriaitf',
-            'tc-applicability',
-            'tcod',
-            'threedd',
-            'tin-antimony-sulfoiodide',
-            'twodmatpedia'
-        ],
-            code = document.querySelector('code'),
-            input = document.querySelector('input'),
-            select = document.querySelector('#providers'),
-            selectPage = document.querySelector('#pages'),
-            options = providers.map(p => {
+        window.onload = fetch('../dist/prefetched.json').then(response => response.json()).then(prefetched => {
+            optimadeClient.providers = prefetched.providers;
+            optimadeClient.apis = prefetched.apis;
+
+            const providersOptions = Object.keys(optimadeClient.providers).map(p => {
                 const option = document.createElement('option')
                 option.value = p
                 option.innerText = p
                 return option
             })
-        select.append(...options)
+            selectProvider.append(...providersOptions)
+        })
 
         function selecting() {
-            console.log(select.value)
+            console.log(selectProvider.value)
             selectPage.innerHTML = ''
         }
-        input.value = 'chemical_formula_anonymous="A2B"'
-        input.size = input.value.length - 5;
-        function inputing() {
-            console.log(input.value)
-        }
+        inputFilter.value = 'chemical_formula_anonymous="A2B"'
+        inputFilter.size = inputFilter.value.length - 5;
+
 
         function getProvider(provider, filter, page) {
             event.preventDefault()
             code.innerText = '...loading'
-            fetch('../dist/prefetched.json').then(response => response.json()).then(prefetched => {
+            optimadeClient.getProviderStructures(provider, filter, page).then(result => {
+                console.dir(result);
 
-                optimadeClient.providers = prefetched.providers;
-                optimadeClient.apis = prefetched.apis;
-
-                optimadeClient.getProviderStructures(provider, filter, page).then(result => {
-                    console.dir(result);
-
-                    function setSelectPage(result) {
-                        const pages = () => {
-                            if (result.meta.provider.prefix === 'mpds')
-                                return Math.trunc(result.meta.data_available / result.meta.data_returned)
-                            else
-                                return Math.trunc(result.meta.data_returned / 100)
+                function setSelectPage(result) {
+                    const pages = () => {
+                        if (result.meta.provider.prefix === 'mpds') {
+                            return Math.trunc(result.meta.data_available / result.meta.data_returned) + 1
+                        } else {
+                            const pages = Math.trunc(result.meta.data_returned / result.data.length)
+                            return pages === 1 ? 0 : pages + 1
                         }
+                    }
+                    if (pages() > 0) {
                         const pagesOptions = [...Array(pages()).keys()].map(p => {
                             const option = document.createElement('option')
                             option.value = p
@@ -116,53 +98,45 @@
                         })
                         selectPage.append(...pagesOptions)
                     }
+                }
 
-                    if (result !== null) {
-                        setSelectPage(result)
-                        const { meta, data, links } = result
-                        const structures = {
+                if (result !== null) {
+                    setSelectPage(result)
+                    const { meta, data, links } = result
+                    const structures = {
+                        provider: meta.provider,
+                        data_length: data.length,
+                        data_available: meta.data_available,
+                        data_returned: meta.data_returned,
+                        more_data_available: meta.more_data_available,
+                        query: meta.query,
+                        links: links
+                    }
+                    code.innerText = JSON.stringify(structures, 0, 2)
+                } else code.innerText = 'null'
+            });
+        }
+
+        function getAllProviders(providers, filter, page) {
+            code.innerText = '...loading'
+            optimadeClient.getAllProvidersStructures(providers, filter, page).then(results => {
+                console.dir(results);
+                const structures = results && results.map(r => {
+                    if (r) {
+                        const { meta, data, links } = r
+                        const provider = {
                             provider: meta.provider,
-                            data_length: data.length,
+                            data: data.length,
                             data_available: meta.data_available,
                             data_returned: meta.data_returned,
                             more_data_available: meta.more_data_available,
-                            query: meta.query,
                             links: links
                         }
-                        code.innerText = JSON.stringify(structures, 0, 2)
-                    } else code.innerText = 'null'
-                });
-
-            }).catch(console.error);
-        }
-
-        function getAllProviders() {
-            code.innerText = '...loading'
-            fetch('../dist/prefetched.json').then(response => response.json()).then(prefetched => {
-
-                optimadeClient.providers = prefetched.providers;
-                optimadeClient.apis = prefetched.apis;
-
-                optimadeClient.getAllProvidersStructures([...providers], 'chemical_formula_anonymous="A2B"').then(results => {
-                    console.dir(results);
-                    const structures = results && results.map(r => {
-                        if (r) {
-                            const { meta, data, links } = r
-                            const provider = {
-                                provider: meta.provider,
-                                data: data.length,
-                                data_available: meta.data_available,
-                                data_returned: meta.data_returned,
-                                more_data_available: meta.more_data_available,
-                                links: links
-                            }
-                            return provider
-                        }
-                    })
-                    code.innerText = JSON.stringify(structures, 0, 2)
-                });
-
-            }).catch(console.error);
+                        return provider
+                    }
+                })
+                code.innerText = JSON.stringify(structures, 0, 2)
+            });
         }
 
     </script>
