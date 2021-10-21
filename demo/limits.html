@@ -11,12 +11,18 @@
         header {
             position: sticky;
             top: 0;
-            background-color: white;
-            padding: 0.5em 0;
+            padding: 0.5rem;
+            background: whitesmoke;
+            margin: -0.5rem;
+            box-sizing: border-box;
         }
 
         nav {
             display: flex;
+        }
+
+        h1 {
+            margin: 0 0 0.5em;
         }
 
         pre {
@@ -28,7 +34,7 @@
 
 <body>
     <header>
-        <!-- <h1>Get providers structures by query_limit demo</h1> -->
+        <h1>Get providers structures by query_limit demo</h1>
         <nav>
             <form onsubmit="getProvider(selectProvider.value, inputFilter.value, selectPage.value || 0)">
                 <fieldset>
