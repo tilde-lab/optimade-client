@@ -74,7 +74,7 @@ export class Optimade {
 
         const structures: Types.StructuresResponse[] = await allSettled(apis.map((api: Types.Api) => {
             const url: string = this.wrapUrl(Optimade.apiVersionUrl(api), filter ? `/structures?filter=${filter}&page_limit=${limit}&page_offset=${limit * page}&page_number=${page}` : `/structures?page_limit=${limit}`);
-            return Optimade.getJSON(url, {}, { Origin: 'https://cors.optimade.science', 'X-Requested-With': 'XMLHttpRequest' }).catch(err => { return err; });
+            return Optimade.getJSON(url, {}, { Origin: 'https://cors.optimade.science', 'X-Requested-With': 'XMLHttpRequest' }).catch(error => { return error; });
         }));
 
         return structures.reduce((structures: any[], structure: Types.StructuresResponse | null) => {

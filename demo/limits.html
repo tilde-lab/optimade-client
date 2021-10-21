@@ -8,6 +8,13 @@
             font-family: system-ui;
         }
 
+        header {
+            position: sticky;
+            top: 0;
+            background-color: white;
+            padding: 0.5em 0;
+        }
+
         nav {
             display: flex;
         }
@@ -20,25 +27,27 @@
 </head>
 
 <body>
-    <h1>Get providers structures by query_limit demo</h1>
-    <nav>
-        <form onsubmit="getProvider(selectProvider.value, inputFilter.value, selectPage.value || 0)">
+    <header>
+        <!-- <h1>Get providers structures by query_limit demo</h1> -->
+        <nav>
+            <form onsubmit="getProvider(selectProvider.value, inputFilter.value, selectPage.value || 0)">
+                <fieldset>
+                    <legend>Select provider</legend>
+                    <input id="filter" placeholder="type formula" />
+                    <select id="providers" onchange="selecting()"></select>
+                    <select id="pages"></select>
+                    <button>get provider</button>
+                </fieldset>
+            </form>
             <fieldset>
-                <legend>Select provider</legend>
-                <input id="filter" placeholder="type formula" />
-                <select id="providers" onchange="selecting()"></select>
-                <select id="pages"></select>
-                <button>get provider</button>
+                <legend>Select all providers</legend>
+                <button
+                    onclick="getAllProviders(Object.keys(optimadeClient.providers), inputFilter.value, selectPage.value || 0)">get
+                    providers</button>
             </fieldset>
-        </form>
-        <fieldset>
-            <legend>Select all providers</legend>
-            <button
-                onclick="getAllProviders(Object.keys(optimadeClient.providers), inputFilter.value, selectPage.value || 0)">get
-                providers</button>
-        </fieldset>
 
-    </nav>
+        </nav>
+    </header>
     <h2>Result:</h2>
     <pre>
         <code>click some button</code>
@@ -52,6 +61,7 @@
         const selectProvider = document.querySelector('#providers')
         const selectPage = document.querySelector('#pages')
         const code = document.querySelector('code')
+        const pre = document.querySelector('pre')
 
         window.onload = fetch('../dist/prefetched.json').then(response => response.json()).then(prefetched => {
             optimadeClient.providers = prefetched.providers;
@@ -75,64 +85,103 @@
 
 
         let current = 0
-        function getProvider(provider, filter, page) {
-            event.preventDefault()
+
+        async function getProvider(provider, filter, page) {
             code.innerText = '...loading'
-            optimadeClient.getProviderStructures(provider, filter, page).then(results => {
-                console.dir(results);
-                const [result] = results
 
-                function setSelectPage(result) {
-                    const calcPages = () => {
-                        const pages = result.meta.pages
-                        return pages === 1 || pages === 0 || pages === Infinity ? 0 : pages
-                    }
-                    const pages = calcPages()
-                    console.log(pages)
+            const apis = await getProviderApis(provider, filter, page)
 
-                    if (pages > 0 && current !== pages) {
-                        const pagesOptions = [...Array(pages).keys()].map(p => {
-                            const option = document.createElement('option')
-                            option.value = p
-                            option.innerText = p
-                            return option
-                        })
-                        selectPage.replaceChildren(...pagesOptions)
-                        current = calcPages()
-                    }
+            if (apis instanceof Error) {
+                code.innerText = apis
+            } else {
+                setSelectPage(apis)
+                code.innerText = JSON.stringify(apis, 0, 2)
+            }
+
+            function setSelectPage(result) {
+                const calcPages = () => {
+                    const pages = result.meta.pages
+                    return pages === 1 || pages === 0 || pages === Infinity ? 0 : pages
                 }
+                const pages = calcPages()
+                console.log(pages)
 
-                if (result instanceof Error) {
-                    code.innerText = result
-                } else {
-                    setSelectPage(result)
-                    const { data, meta } = result
-                    const structures = { data: data.length, meta }
-                    code.innerText = JSON.stringify(structures, 0, 2)
+                if (pages > 0 && current !== pages) {
+                    const pagesOptions = [...Array(pages).keys()].map(p => {
+                        const option = document.createElement('option')
+                        option.value = p
+                        option.innerText = p
+                        return option
+                    })
+                    selectPage.replaceChildren(...pagesOptions)
+                    current = calcPages()
                 }
-            }).catch(err => console.log(err))
+            }
         }
 
-        function getAllProviders(providers, filter, page) {
+        async function getProviderApis(provider, filter, page) {
+            event.preventDefault()
+
+            const results = await optimadeClient.getProviderStructures(provider, filter, page)
+            console.dir(results);
+
+            const [result] = results
+
+            if (result instanceof Error) {
+                return result
+            } else {
+                const { data, meta } = result
+                const structures = { data: data.length, meta }
+                return structures
+            }
+        }
+
+        async function getAllProviders(providers, filter, page) {
             code.innerText = '...loading'
-            optimadeClient.getAllProvidersStructures(providers, filter, page).then(results => {
-                console.dir(results);
-                const structures = results && results.map(result => {
-                    if (result[0].some(r => r instanceof Error)) {
-                        const [[error], provider] = result
-                        const response = { error, provider }
-                        return response
-                    } else {
-                        const [[{ data, meta }], provider] = result
-                        const response = {
-                            apis: [{ data: data.length, meta }],
-                            provider
-                        }
-                        return response
-                    }
+
+            const apis = await getAllProvidersApis(providers, filter, page)
+
+            const ol = document.createElement('ol')
+
+            function addPager(length) {
+                return [...Array(length).keys()].map((a, i) => {
+                    const but = document.createElement('button')
+                    but.innerText = a
+                    but.id = i
+                    return but
                 })
-                code.innerText = JSON.stringify(structures, 0, 2)
+            }
+
+            const providersList = apis.map(s => {
+                console.log(s)
+                const li = document.createElement('li')
+                li.innerText = JSON.stringify(s, 0, 2)
+                if (s.apis) {
+                    li.append(...addPager(s.apis[0].meta.pages))
+                }
+                return li
             });
+            ol.replaceChildren(...providersList)
+            code.replaceChildren(ol)
+        }
+
+        async function getAllProvidersApis(providers, filter, page) {
+
+            const results = await optimadeClient.getAllProvidersStructures(providers, filter, page)
+            console.dir(results);
+
+            return results.map(result => {
+                if (result[0].some(r => r instanceof Error)) {
+                    const [[error], provider] = result
+                    return { error, provider }
+                } else {
+                    const [[{ data, meta }], provider] = result
+                    return {
+                        apis: [{ data: data.length, meta }],
+                        provider
+                    }
+                }
+            })
         }
 
     </script>
