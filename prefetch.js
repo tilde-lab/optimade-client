@@ -16,9 +16,7 @@ optimade.getProviders().then(async () => {
 
 	const filteredApis = Object.entries(optimade.apis).filter(([k, v]) => v.length);
 	const apis = filteredApis.sort().reduce((acc, [k, v]) => {
-		if (v.length > 0) {
-			return { ...acc, ...{ [k]: v } };
-		}
+		return { ...acc, ...{ [k]: v } };
 	}, {});
 
 	const source = Object.keys(optimade.providers).sort().reduce(
@@ -33,8 +31,8 @@ optimade.getProviders().then(async () => {
 			const url = `${v.attributes.base_url}/v1/structures?filter=chemical_formula_anonymous="A2B"&page_limit=${max}`;
 			try {
 				const res = await fetch(url).then(res => res.json());
+				const api = res.meta && res.meta.api_version;
 				console.dir(res);
-				const api = res?.meta.api_version;
 				const detail = (e) => {
 					return e
 						? e.length
@@ -45,7 +43,7 @@ optimade.getProviders().then(async () => {
 				const nums = detail(res.errors).match(/\d+/g).filter(n => +n < max).map(n => +n);
 				if (!nums.includes(0))
 					return {
-						[k]: { ...v, attributes: { ...v.attributes, ['query_limits']: nums, api_version: api } }
+						[k]: { ...v, attributes: { ...v.attributes, api_version: api, ['query_limits']: nums } }
 					};
 			} catch (error) {
 				console.log(error);
@@ -58,15 +56,14 @@ optimade.getProviders().then(async () => {
 			return { ...acc, ...provider };
 		}, Promise.resolve({}));
 
-		const keys = Object.keys(providers).sort();
-
-		const log = { keys: Object.keys(keys).length, providers: Object.keys(providers).length, source: Object.keys(source).length };
+		const log = { prefetched: Object.keys(providers).length, source: Object.keys(source).length };
 		console.log(log);
-		return { keys, providers };
+
+		return providers;
 	}
 
 	getQueryLimits(source).then(providers => {
-		const data = { ...providers, apis };
+		const data = { providers, apis };
 		fs.writeFile(path.join(__dirname, 'dist/prefetched.json'), JSON.stringify(data), (err) => {
 			if (err) throw err;
 			console.log('The prefetched.json file has been saved!');

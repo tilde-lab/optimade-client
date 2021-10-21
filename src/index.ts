@@ -64,19 +64,42 @@ export class Optimade {
         return Optimade.apiVersion(apis);
     }
 
-    async getProviderStructures(providerId: string, filter: string = '', page: number = 0): Promise<Types.StructuresResponse | null> {
+    async getProviderStructures(providerId: string, filter: string = '', page: number = 0): Promise<Types.StructuresResponse[] | null> {
 
         if (!this.apis[providerId]) return null;
 
         const apis = this.apis[providerId].filter(api => api.attributes.available_endpoints.includes('structures'));
         const provider = this.providers[providerId];
+        const limit = Math.max(...provider.attributes.query_limits);
 
         const structures: Types.StructuresResponse[] = await allSettled(apis.map((api: Types.Api) => {
-            const limit = Math.max(...provider.attributes.query_limits);
             const url: string = this.wrapUrl(Optimade.apiVersionUrl(api), filter ? `/structures?filter=${filter}&page_limit=${limit}&page_offset=${limit * page}&page_number=${page}` : `/structures?page_limit=${limit}`);
-            return Optimade.getJSON(url, {}, { Origin: 'https://cors.optimade.science', 'X-Requested-With': 'XMLHttpRequest' });
+            return Optimade.getJSON(url, {}, { Origin: 'https://cors.optimade.science', 'X-Requested-With': 'XMLHttpRequest' }).catch(err => { return err; });
         }));
-        return structures[0];
+
+        return structures.reduce((structures: any[], structure: Types.StructuresResponse | null) => {
+            console.log(structure);
+
+            if (structure instanceof Error) {
+                return structures.concat(structure);
+            } else {
+                const { data, meta } = structure;
+                const api = {
+                    data: data,
+                    meta: {
+                        version: meta.api_version,
+                        available: meta.data_available,
+                        returned: meta.data_returned,
+                        more: meta.more_data_available,
+                        query: meta.query.representation,
+                        provider: meta.provider,
+                        limit: limit,
+                        pages: Math.trunc(meta.data_returned / limit) + 1
+                    }
+                };
+                return structures.concat(api);
+            }
+        }, []);
     }
 
     async getAllProvidersStructures(providerIds: string[], filter: string = '', page: number = 0): Promise<[Promise<Types.StructuresResponse>, Promise<Types.Provider>][][]> {
@@ -84,9 +107,9 @@ export class Optimade {
             const provider = this.providers[providerId];
             if (provider) {
                 const settled = allSettled([
-                    this.getProviderStructures(providerId, filter, page)
-                    // ]).then(s => [ data: s[0].data, meta: { ...s[0].meta, ...s[0].links } ]);
-                ]).then(s => s[0]);
+                    this.getProviderStructures(providerId, filter, page),
+                    Promise.resolve(provider)
+                ]);
                 structures.push(settled);
             }
             return structures;
@@ -97,7 +120,7 @@ export class Optimade {
 
         if (!this.apis[providerId]) return null;
 
-        const apis = this.apis[providerId].filter(api => api.attributes.available_endpoints.includes('structures'));
+        const apis = this.apis[providerId].filter(api => api.type === 'info' && api.attributes.available_endpoints.includes('structures'));
 
         const structures: Types.StructuresResponse[] = await allSettled(apis.map((api: Types.Api) => {
             const url: string = this.wrapUrl(Optimade.apiVersionUrl(api), filter ? `/structures?filter=${filter}` : `/structures`);

@@ -74,65 +74,61 @@
         inputFilter.size = inputFilter.value.length - 5;
 
 
+        let current = 0
         function getProvider(provider, filter, page) {
             event.preventDefault()
             code.innerText = '...loading'
-            optimadeClient.getProviderStructures(provider, filter, page).then(result => {
-                console.dir(result);
+            optimadeClient.getProviderStructures(provider, filter, page).then(results => {
+                console.dir(results);
+                const [result] = results
 
                 function setSelectPage(result) {
-                    const pages = () => {
-                        if (result.meta.provider.prefix === 'mpds') {
-                            return Math.trunc(result.meta.data_available / result.meta.data_returned) + 1
-                        } else {
-                            const pages = Math.trunc(result.meta.data_returned / result.data.length)
-                            return pages === 1 ? 0 : pages + 1
-                        }
+                    const calcPages = () => {
+                        const pages = result.meta.pages
+                        return pages === 1 || pages === 0 || pages === Infinity ? 0 : pages
                     }
-                    if (pages() > 0) {
-                        const pagesOptions = [...Array(pages()).keys()].map(p => {
+                    const pages = calcPages()
+                    console.log(pages)
+
+                    if (pages > 0 && current !== pages) {
+                        const pagesOptions = [...Array(pages).keys()].map(p => {
                             const option = document.createElement('option')
                             option.value = p
                             option.innerText = p
                             return option
                         })
-                        selectPage.append(...pagesOptions)
+                        selectPage.replaceChildren(...pagesOptions)
+                        current = calcPages()
                     }
                 }
 
-                if (result !== null) {
+                if (result instanceof Error) {
+                    code.innerText = result
+                } else {
                     setSelectPage(result)
-                    const { meta, data, links } = result
-                    const structures = {
-                        provider: meta.provider,
-                        data_length: data.length,
-                        data_available: meta.data_available,
-                        data_returned: meta.data_returned,
-                        more_data_available: meta.more_data_available,
-                        query: meta.query,
-                        links: links
-                    }
+                    const { data, meta } = result
+                    const structures = { data: data.length, meta }
                     code.innerText = JSON.stringify(structures, 0, 2)
-                } else code.innerText = 'null'
-            });
+                }
+            }).catch(err => console.log(err))
         }
 
         function getAllProviders(providers, filter, page) {
             code.innerText = '...loading'
             optimadeClient.getAllProvidersStructures(providers, filter, page).then(results => {
                 console.dir(results);
-                const structures = results && results.map(r => {
-                    if (r) {
-                        const { meta, data, links } = r
-                        const provider = {
-                            provider: meta.provider,
-                            data: data.length,
-                            data_available: meta.data_available,
-                            data_returned: meta.data_returned,
-                            more_data_available: meta.more_data_available,
-                            links: links
+                const structures = results && results.map(result => {
+                    if (result[0].some(r => r instanceof Error)) {
+                        const [[error], provider] = result
+                        const response = { error, provider }
+                        return response
+                    } else {
+                        const [[{ data, meta }], provider] = result
+                        const response = {
+                            apis: [{ data: data.length, meta }],
+                            provider
                         }
-                        return provider
+                        return response
                     }
                 })
                 code.innerText = JSON.stringify(structures, 0, 2)
