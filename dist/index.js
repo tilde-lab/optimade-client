@@ -96,7 +96,7 @@
                 }
                 else {
                     const { data, meta } = structure;
-                    const pages = page === 0 && Math.trunc(meta.data_returned / limit) + 1;
+                    const pages = page === 0 && Math.ceil(meta.data_returned / limit);
                     const api = {
                         data,
                         meta: {
