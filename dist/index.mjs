@@ -75,7 +75,7 @@ class Optimade {
         const apis = await Optimade.getJSON(url);
         return Optimade.apiVersion(apis);
     }
-    async getProviderStructures(providerId, filter = '', page = 0) {
+    async getStructures(providerId, filter = '', page = 0) {
         if (!this.apis[providerId])
             return null;
         const apis = this.apis[providerId].filter(api => api.attributes.available_endpoints.includes('structures'));
@@ -108,32 +108,6 @@ class Optimade {
                 };
                 return structures.concat(api);
             }
-        }, []);
-    }
-    async getAllProvidersStructures(providerIds, filter = '', page = 0) {
-        return Promise.all(providerIds.reduce((structures, providerId) => {
-            const provider = this.providers[providerId];
-            if (provider) {
-                const settled = allSettled([
-                    this.getProviderStructures(providerId, filter, page),
-                    Promise.resolve(provider)
-                ]);
-                structures.push(settled);
-            }
-            return structures;
-        }, []));
-    }
-    async getStructures(providerId, filter = '') {
-        if (!this.apis[providerId])
-            return null;
-        const apis = this.apis[providerId].filter(api => api.type === 'info' && api.attributes.available_endpoints.includes('structures'));
-        const structures = await allSettled(apis.map((api) => {
-            const url = this.wrapUrl(Optimade.apiVersionUrl(api), filter ? `/structures?filter=${filter}` : `/structures`);
-            return Optimade.getJSON(url);
-        }));
-        return structures.reduce((structures, structure) => {
-            console.log(structure);
-            return structure ? structures.concat(structure.data) : structures;
         }, []);
     }
     getStructuresAll(providerIds, filter = '', batch = true) {

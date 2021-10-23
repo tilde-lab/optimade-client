@@ -64,7 +64,7 @@ export class Optimade {
         return Optimade.apiVersion(apis);
     }
 
-    async getProviderStructures(providerId: string, filter: string = '', page: number = 0): Promise<Types.StructuresResponse[] | null> {
+    async getStructures(providerId: string, filter: string = '', page: number = 0): Promise<Types.StructuresResponse[] | null> {
 
         if (!this.apis[providerId]) return null;
 
@@ -100,39 +100,6 @@ export class Optimade {
                 };
                 return structures.concat(api);
             }
-        }, []);
-    }
-
-    async getAllProvidersStructures(providerIds: string[], filter: string = '', page: number = 0): Promise<[Promise<Types.StructuresResponse>, Promise<Types.Provider>][][]> {
-        return Promise.all(providerIds.reduce((structures: Promise<any>[], providerId: string) => {
-            const provider = this.providers[providerId];
-            if (provider) {
-                const settled = allSettled([
-                    this.getProviderStructures(providerId, filter, page),
-                    Promise.resolve(provider)
-                ]);
-                structures.push(settled);
-            }
-            return structures;
-        }, []));
-    }
-
-    async getStructures(providerId: string, filter: string = ''): Promise<Types.Structure[] | null> {
-
-        if (!this.apis[providerId]) return null;
-
-        const apis = this.apis[providerId].filter(api => api.type === 'info' && api.attributes.available_endpoints.includes('structures'));
-
-        const structures: Types.StructuresResponse[] = await allSettled(apis.map((api: Types.Api) => {
-            const url: string = this.wrapUrl(Optimade.apiVersionUrl(api), filter ? `/structures?filter=${filter}` : `/structures`);
-            // TODO pagination e.g. url += (filter ? '&' : '?') + 'page_limit=100'
-            return Optimade.getJSON(url);
-        }));
-
-        // console.log('Ready ' + providerId);
-        return structures.reduce((structures: Types.Structure[], structure: Types.StructuresResponse | null) => {
-            console.log(structure);
-            return structure ? structures.concat(structure.data) : structures;
         }, []);
     }
 

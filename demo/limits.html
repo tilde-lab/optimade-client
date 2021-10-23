@@ -51,8 +51,7 @@
             </form>
             <fieldset>
                 <legend>Select all providers</legend>
-                <button
-                    onclick="getAllProviders(Object.keys(optimadeClient.providers), inputFilter.value, selectPage.value || 0)">get
+                <button onclick="getAllProviders(Object.keys(optimadeClient.providers), inputFilter.value)">get
                     providers</button>
             </fieldset>
 
@@ -132,7 +131,7 @@
         async function getProviderApis(provider, filter, page) {
             event.preventDefault()
 
-            const results = await optimadeClient.getProviderStructures(provider, filter, page)
+            const results = await optimadeClient.getStructures(provider, filter, page)
             console.dir(results);
 
             const [result] = results
@@ -182,9 +181,9 @@
             code.replaceChildren(ol)
         }
 
-        async function getAllProvidersApis(providers, filter, page) {
+        async function getAllProvidersApis(providers, filter) {
 
-            const results = await optimadeClient.getAllProvidersStructures(providers, filter, page)
+            const results = await optimadeClient.getStructuresAll(providers, filter)
             console.dir(results);
 
             return results.map(result => {
