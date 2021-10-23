@@ -102,13 +102,13 @@ export class Optimade {
         }, []);
     }
 
-    getStructuresAll(providerIds: string[], filter: string = '', batch: boolean = true): Promise<Promise<Types.StructuresResult>[]> | Promise<Types.StructuresResult>[] {
+    getStructuresAll(providerIds: string[], filter: string = '', page: number = 0, batch: boolean = true): Promise<Promise<Types.StructuresResult>[]> | Promise<Types.StructuresResult>[] {
 
         const results = providerIds.reduce((structures: Promise<any>[], providerId: string) => {
             const provider = this.providers[providerId];
             if (provider) {
                 structures.push(allSettled([
-                    this.getStructures(providerId, filter),
+                    this.getStructures(providerId, filter, page),
                     Promise.resolve(provider)
                 ]));
             }

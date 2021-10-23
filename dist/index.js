@@ -113,12 +113,12 @@
                 }
             }, []);
         }
-        getStructuresAll(providerIds, filter = '', batch = true) {
+        getStructuresAll(providerIds, filter = '', page = 0, batch = true) {
             const results = providerIds.reduce((structures, providerId) => {
                 const provider = this.providers[providerId];
                 if (provider) {
                     structures.push(allSettled([
-                        this.getStructures(providerId, filter),
+                        this.getStructures(providerId, filter, page),
                         Promise.resolve(provider)
                     ]));
                 }
