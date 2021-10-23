@@ -7,8 +7,8 @@ export { Types };
 export class Optimade {
     private providersUrl: string = '';
     private corsProxyUrl: string = '';
-    public providers: Types.ProvidersMap | null = null;
-    public apis: Types.ApisMap = {};
+    providers: Types.ProvidersMap | null = null;
+    apis: Types.ApisMap = {};
     private reqStack: string[] = [];
 
     constructor({ providersUrl = '', corsProxyUrl = '' }: { providersUrl?: string; corsProxyUrl?: string; } = {}) {
@@ -84,8 +84,9 @@ export class Optimade {
                 return structures.concat(structure);
             } else {
                 const { data, meta } = structure;
+                const pages = page === 0 && Math.trunc(meta.data_returned / limit) + 1;
                 const api = {
-                    data: data,
+                    data,
                     meta: {
                         version: meta.api_version,
                         available: meta.data_available,
@@ -93,8 +94,8 @@ export class Optimade {
                         more: meta.more_data_available,
                         query: meta.query.representation,
                         provider: meta.provider,
-                        limit: limit,
-                        pages: Math.trunc(meta.data_returned / limit) + 1
+                        limit,
+                        pages
                     }
                 };
                 return structures.concat(api);
@@ -128,7 +129,7 @@ export class Optimade {
             return Optimade.getJSON(url);
         }));
 
-        //console.log('Ready ' + providerId);
+        // console.log('Ready ' + providerId);
         return structures.reduce((structures: Types.Structure[], structure: Types.StructuresResponse | null) => {
             console.log(structure);
             return structure ? structures.concat(structure.data) : structures;
