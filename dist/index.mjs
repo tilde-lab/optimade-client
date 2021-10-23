@@ -101,7 +101,6 @@ class Optimade {
                         returned: meta.data_returned,
                         more: meta.more_data_available,
                         query: meta.query.representation,
-                        provider: meta.provider,
                         limit,
                         pages
                     }

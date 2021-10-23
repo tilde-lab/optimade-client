@@ -12,7 +12,7 @@ export declare class Optimade {
     });
     getProviders(api?: Types.Api): Promise<Types.ProvidersMap | null>;
     getApis(provider: Types.Provider | string, version?: string): Promise<Types.Api | null>;
-    getStructures(providerId: string, filter?: string, page?: number): Promise<Types.StructuresResponse[] | null>;
+    getStructures(providerId: string, filter?: string, page?: number): Promise<Types.ProviderApisResponse[] | null>;
     getStructuresAll(providerIds: string[], filter?: string, batch?: boolean): Promise<Promise<Types.StructuresResult>[]> | Promise<Types.StructuresResult>[];
     private followLinks;
     private wrapUrl;

@@ -64,7 +64,7 @@ export class Optimade {
         return Optimade.apiVersion(apis);
     }
 
-    async getStructures(providerId: string, filter: string = '', page: number = 0): Promise<Types.StructuresResponse[] | null> {
+    async getStructures(providerId: string, filter: string = '', page: number = 0): Promise<Types.ProviderApisResponse[] | null> {
 
         if (!this.apis[providerId]) return null;
 
@@ -77,7 +77,7 @@ export class Optimade {
             return Optimade.getJSON(url, {}, { Origin: 'https://cors.optimade.science', 'X-Requested-With': 'XMLHttpRequest' }).catch(error => { return error; });
         }));
 
-        return structures.reduce((structures: any[], structure: Types.StructuresResponse | null) => {
+        return structures.reduce((structures: any[], structure: Types.StructuresResponse | Types.ResponseError): Types.ProviderApisResponse[] => {
             console.log(structure);
 
             if (structure instanceof Error) {
@@ -93,7 +93,6 @@ export class Optimade {
                         returned: meta.data_returned,
                         more: meta.more_data_available,
                         query: meta.query.representation,
-                        provider: meta.provider,
                         limit,
                         pages
                     }

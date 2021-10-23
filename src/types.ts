@@ -74,6 +74,19 @@ export interface Structure {
     };
 }
 
+export interface ProviderApisResponse {
+    data: Structure[];
+    meta?: {
+        version: string,
+        available: number,
+        returned: number,
+        more: boolean,
+        query: string,
+        limit: number,
+        pages: number | boolean;
+    };
+}
+
 export interface ProvidersResponse {
     data: Provider[];
     meta?: Meta;
@@ -106,4 +119,4 @@ export interface ResponseError extends Error {
 export type ProvidersMap = { [key: string]: Provider; };
 export type ApisMap = { [key: string]: Api[]; };
 
-export type StructuresResult = [Promise<Structure>, Promise<Provider>][];
+export type StructuresResult = [Promise<ProviderApisResponse[]>, Promise<Provider>][];
