@@ -44,7 +44,7 @@
                 <fieldset>
                     <legend>Select provider</legend>
                     <input id="filter" placeholder="type formula" />
-                    <input id="limit" onchange="limitting(event)" type="number" size="5" placeholder="set limit" />
+                    <input id="limit" onchange="limitting(event)" type="number" size="7" placeholder="set limit" />
                     <select id="providers" onchange="providering()"></select>
                     <select id="pages"></select>
                     <button>get provider</button>
@@ -106,14 +106,16 @@
 
         async function getProvider(provider, filter, page, limit) {
             code.innerText = '...loading'
+            code.style.color = 'inherit'
 
             const apis = await getProviderApis(provider, filter, page, limit)
 
             if (apis instanceof Error || Object.keys(apis).includes('errors')) {
                 code.innerText = apis
+                code.style.color = 'red'
             } else {
                 setSelectPage(apis)
-                // inputLimit.value = apis.meta.limit
+                inputLimit.placeholder = `Max: ${apis.meta.limit}`
                 console.log(+inputLimit.value)
                 code.innerText = JSON.stringify(apis, 0, 2)
             }

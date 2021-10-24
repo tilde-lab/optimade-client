@@ -146,8 +146,12 @@ class Optimade {
         }
         const res = await fetchWithTimeout(url.toString(), { headers }, timeout);
         if (!res.ok) {
-            const err = new Error(res.statusText);
-            err.response = res;
+            const error = await res.json();
+            const { errors } = error;
+            const [{ detail }] = errors;
+            const message = `${detail}`;
+            const err = new Error(message);
+            err.response = error;
             throw err;
         }
         if (res.status !== 204) {

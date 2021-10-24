@@ -150,11 +150,20 @@ export class Optimade {
             Object.entries(params).forEach((param: [string, any]) => url.searchParams.append(...param));
         }
 
+        try {
+            // const r = await fetch(url.toString(), { headers });
+            // console.log(r);
+        } catch (e) { console.log(e); }
+
         const res = await fetchWithTimeout(url.toString(), { headers }, timeout);
 
         if (!res.ok) {
-            const err: Types.ResponseError = new Error(res.statusText);
-            err.response = res;
+            const error: Types.ErrorResponse = await res.json();
+            const { errors } = error;
+            const [{ detail }] = errors;
+            const message = `${detail}`;
+            const err: Types.ResponseError = new Error(message);
+            err.response = error;
             throw err;
         }
 

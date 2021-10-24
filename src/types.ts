@@ -116,6 +116,16 @@ export interface ResponseError extends Error {
     response?: any;
 }
 
+export interface ErrorObject {
+    status: string;
+    title: string;
+    detail: string;
+}
+export interface ErrorResponse {
+    errors: ErrorObject[];
+    meta: any;
+}
+
 export type ProvidersMap = { [key: string]: Provider; };
 export type ApisMap = { [key: string]: Api[]; };
 
