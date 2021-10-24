@@ -92,11 +92,10 @@
             selectPage.innerHTML = ''
             selectPage.value = ''
             inputLimit.value = ''
+            inputLimit.placeholder = 'set limit'
         }
         function limitting(e) {
-            console.log(e.target.value)
-            const value = e.target.value
-            if (value <= 0) inputLimit.value = ''
+            if (e.target.value <= 0) inputLimit.value = ''
         }
         inputFilter.value = 'nelements=2'
         inputFilter.size = inputFilter.value.length;
@@ -116,7 +115,6 @@
             } else {
                 setSelectPage(apis)
                 inputLimit.placeholder = `Max: ${apis.meta.limit}`
-                console.log(+inputLimit.value)
                 code.innerText = JSON.stringify(apis, 0, 2)
             }
 
