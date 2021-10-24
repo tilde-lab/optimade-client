@@ -18,7 +18,9 @@ export interface Meta {
         name: string;
         description: string;
         prefix: string;
-    };
+    },
+    pages?: number;
+    limit?: number;
 }
 
 export interface Links {
@@ -83,7 +85,7 @@ export interface ProviderApisResponse {
         more: boolean,
         query: string,
         limit: number,
-        pages: number | boolean;
+        pages: number;
     };
 }
 
@@ -119,10 +121,11 @@ export interface ResponseError extends Error {
 export interface ErrorObject {
     status: string;
     title: string;
-    detail: string;
+    detail?: string;
+    length?: string;
 }
 export interface ErrorResponse {
-    errors: ErrorObject[];
+    errors: any;
     meta: any;
 }
 

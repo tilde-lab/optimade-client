@@ -84,13 +84,18 @@
                 return null;
             const apis = this.apis[providerId].filter(api => api.attributes.available_endpoints.includes('structures'));
             const provider = this.providers[providerId];
-            const structures = await allSettled(apis.map((api) => {
-                const pageLimit = limit ? `page_limit=${limit}` : '';
+            const structures = await allSettled(apis.map(async (api) => {
+                const pageLimit = limit ? `&page_limit=${limit}` : '';
                 const pageNumber = page ? `&page_number=${page}` : '';
-                const pageOffset = limit ? `&page_offset=${limit * page}` : '';
-                const params = filter ? `${pageLimit + pageNumber + pageOffset}` : `${pageLimit}`;
-                const url = this.wrapUrl(Optimade.apiVersionUrl(api), filter ? `/structures?filter=${filter}&${params}` : `/structures?${params}`);
-                return Optimade.getJSON(url, {}, { Origin: 'https://cors.optimade.science', 'X-Requested-With': 'XMLHttpRequest' }).catch(error => { return error; });
+                const pageOffset = limit && page ? `&page_offset=${limit * page}` : '';
+                const params = filter ? `${pageLimit + pageNumber + pageOffset}` : `?${pageLimit}`;
+                const url = this.wrapUrl(Optimade.apiVersionUrl(api), filter ? `/structures?filter=${filter + params}` : `/structures${params}`);
+                try {
+                    return await Optimade.getJSON(url, {}, { Origin: 'https://cors.optimade.science', 'X-Requested-With': 'XMLHttpRequest' });
+                }
+                catch (error) {
+                    return error;
+                }
             }));
             return structures.reduce((structures, structure) => {
                 console.log(structure);
@@ -98,21 +103,9 @@
                     return structures.concat(structure);
                 }
                 else {
-                    const { data, meta } = structure;
-                    const pages = Math.ceil(meta.data_returned / (limit || data.length));
-                    const api = {
-                        data,
-                        meta: {
-                            version: meta.api_version,
-                            available: meta.data_available,
-                            returned: meta.data_returned,
-                            more: meta.more_data_available,
-                            query: meta.query.representation,
-                            limit: Math.max(...provider.attributes.query_limits),
-                            pages
-                        }
-                    };
-                    return structures.concat(api);
+                    structure.meta.pages = Math.ceil(structure.meta.data_returned / (limit || structure.data.length));
+                    structure.meta.limit = Math.max(...provider.attributes.query_limits);
+                    return structures.concat(structure);
                 }
             }, []);
         }
@@ -151,8 +144,7 @@
             const res = await fetchWithTimeout(url.toString(), { headers }, timeout);
             if (!res.ok) {
                 const error = await res.json();
-                const { errors } = error;
-                const [{ detail }] = errors;
+                const detail = error.errors.length ? error.errors[0].detail : error.errors.detail;
                 const message = `${detail}`;
                 const err = new Error(message);
                 err.response = error;

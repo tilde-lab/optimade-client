@@ -19,6 +19,8 @@ export interface Meta {
         description: string;
         prefix: string;
     };
+    pages?: number;
+    limit?: number;
 }
 export interface Links {
     base_url: string;
@@ -77,7 +79,7 @@ export interface ProviderApisResponse {
         more: boolean;
         query: string;
         limit: number;
-        pages: number | boolean;
+        pages: number;
     };
 }
 export interface ProvidersResponse {
@@ -106,10 +108,11 @@ export interface ResponseError extends Error {
 export interface ErrorObject {
     status: string;
     title: string;
-    detail: string;
+    detail?: string;
+    length?: string;
 }
 export interface ErrorResponse {
-    errors: ErrorObject[];
+    errors: any;
     meta: any;
 }
 export declare type ProvidersMap = {
