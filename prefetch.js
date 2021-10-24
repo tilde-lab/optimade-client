@@ -30,7 +30,8 @@ optimade.getProviders().then(async () => {
 	async function getQueryLimits(providers, max = 1000) {
 
 		const fetchLimits = async (k, v) => {
-			const url = `${v.attributes.base_url}/v1/structures?filter=chemical_formula_anonymous="A2B"&page_limit=${max}`;
+			const formula = `chemical_formula_anonymous="A2B"`;
+			const url = `${v.attributes.base_url}/v1/structures?filter=${formula}&page_limit=${max}`;
 			try {
 				const res = await fetch(url).then(res => res.json());
 				const api = res.meta && res.meta.api_version;

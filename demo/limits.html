@@ -40,13 +40,12 @@
     <header>
         <h1>Get providers structures by query_limit demo</h1>
         <nav>
-            <form
-                onsubmit="getProvider(selectProvider.value, inputFilter.value, selectPage.value || 0, +inputLimit.value || 0)">
+            <form onsubmit="getProvider(selectProvider.value, inputFilter.value, selectPage.value, inputLimit.value)">
                 <fieldset>
                     <legend>Select provider</legend>
                     <input id="filter" placeholder="type formula" />
-                    <input id="limit" type="number" size="5" placeholder="set limit" />
-                    <select id="providers" onchange="selecting()"></select>
+                    <input id="limit" onchange="limitting(event)" type="number" size="5" placeholder="set limit" />
+                    <select id="providers" onchange="providering()"></select>
                     <select id="pages"></select>
                     <button>get provider</button>
                 </fieldset>
@@ -88,9 +87,16 @@
             selectProvider.append(...providersOptions)
         })
 
-        function selecting() {
+        function providering() {
             console.log(selectProvider.value)
             selectPage.innerHTML = ''
+            selectPage.value = ''
+            inputLimit.value = ''
+        }
+        function limitting(e) {
+            console.log(e.target.value)
+            const value = e.target.value
+            if (value <= 0) inputLimit.value = ''
         }
         inputFilter.value = 'nelements=2'
         inputFilter.size = inputFilter.value.length;
