@@ -79,24 +79,23 @@
             const apis = await Optimade.getJSON(url);
             return Optimade.apiVersion(apis);
         }
-        async getStructures(providerId, filter = '', page = 0) {
+        async getStructures(providerId, filter = '', page = 0, limit = 0) {
             if (!this.apis[providerId])
                 return null;
             const apis = this.apis[providerId].filter(api => api.attributes.available_endpoints.includes('structures'));
             const provider = this.providers[providerId];
-            const limit = Math.max(...provider.attributes.query_limits);
             const structures = await allSettled(apis.map((api) => {
                 const url = this.wrapUrl(Optimade.apiVersionUrl(api), filter ? `/structures?filter=${filter}&page_limit=${limit}&page_offset=${limit * page}&page_number=${page}` : `/structures?page_limit=${limit}`);
                 return Optimade.getJSON(url, {}, { Origin: 'https://cors.optimade.science', 'X-Requested-With': 'XMLHttpRequest' }).catch(error => { return error; });
             }));
             return structures.reduce((structures, structure) => {
                 console.log(structure);
-                if (structure instanceof Error) {
+                if (structure instanceof Error || Object.keys(structure).includes('errors')) {
                     return structures.concat(structure);
                 }
                 else {
                     const { data, meta } = structure;
-                    const pages = page === 0 && Math.ceil(meta.data_returned / limit);
+                    const pages = Math.ceil(meta.data_returned / (limit || data.length));
                     const api = {
                         data,
                         meta: {
@@ -105,7 +104,7 @@
                             returned: meta.data_returned,
                             more: meta.more_data_available,
                             query: meta.query.representation,
-                            limit,
+                            limit: Math.max(...provider.attributes.query_limits),
                             pages
                         }
                     };
@@ -113,12 +112,12 @@
                 }
             }, []);
         }
-        getStructuresAll(providerIds, filter = '', page = 0, batch = true) {
+        getStructuresAll(providerIds, filter = '', page = 0, limit, batch = true) {
             const results = providerIds.reduce((structures, providerId) => {
                 const provider = this.providers[providerId];
                 if (provider) {
                     structures.push(allSettled([
-                        this.getStructures(providerId, filter, page),
+                        this.getStructures(providerId, filter, page, limit),
                         Promise.resolve(provider)
                     ]));
                 }

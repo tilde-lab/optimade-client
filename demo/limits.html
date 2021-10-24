@@ -40,10 +40,12 @@
     <header>
         <h1>Get providers structures by query_limit demo</h1>
         <nav>
-            <form onsubmit="getProvider(selectProvider.value, inputFilter.value, selectPage.value || 0)">
+            <form
+                onsubmit="getProvider(selectProvider.value, inputFilter.value, selectPage.value || 0, +inputLimit.value || 0)">
                 <fieldset>
                     <legend>Select provider</legend>
                     <input id="filter" placeholder="type formula" />
+                    <input id="limit" type="number" size="5" placeholder="set limit" />
                     <select id="providers" onchange="selecting()"></select>
                     <select id="pages"></select>
                     <button>get provider</button>
@@ -66,7 +68,8 @@
     <script>
         "use strict";
         const optimadeClient = new optimade.Optimade({ corsProxyUrl: 'https://cors.optimade.science' });
-        const inputFilter = document.querySelector('input')
+        const inputFilter = document.querySelector('#filter')
+        const inputLimit = document.querySelector('#limit')
         const selectProvider = document.querySelector('#providers')
         const selectPage = document.querySelector('#pages')
         const code = document.querySelector('code')
@@ -89,21 +92,23 @@
             console.log(selectProvider.value)
             selectPage.innerHTML = ''
         }
-        inputFilter.value = 'chemical_formula_anonymous="A2B"'
-        inputFilter.size = inputFilter.value.length - 5;
+        inputFilter.value = 'nelements=2'
+        inputFilter.size = inputFilter.value.length;
 
 
         let current = 0
 
-        async function getProvider(provider, filter, page) {
+        async function getProvider(provider, filter, page, limit) {
             code.innerText = '...loading'
 
-            const apis = await getProviderApis(provider, filter, page)
+            const apis = await getProviderApis(provider, filter, page, limit)
 
-            if (apis instanceof Error) {
+            if (apis instanceof Error || Object.keys(apis).includes('errors')) {
                 code.innerText = apis
             } else {
                 setSelectPage(apis)
+                // inputLimit.value = apis.meta.limit
+                console.log(+inputLimit.value)
                 code.innerText = JSON.stringify(apis, 0, 2)
             }
 
@@ -128,15 +133,15 @@
             }
         }
 
-        async function getProviderApis(provider, filter, page) {
+        async function getProviderApis(provider, filter, page, limit) {
             event.preventDefault()
 
-            const results = await optimadeClient.getStructures(provider, filter, page)
+            const results = await optimadeClient.getStructures(provider, filter, page, limit)
             console.dir(results);
 
             const [result] = results
 
-            if (result instanceof Error) {
+            if (result instanceof Error || Object.keys(result).includes('errors')) {
                 return result
             } else {
                 const { data, meta } = result

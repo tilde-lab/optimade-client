@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+/* jshint esversion: 6 */
+
 const fs = require('fs');
 const path = require('path');
 const { Optimade } = require('./dist/index');

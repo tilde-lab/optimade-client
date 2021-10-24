@@ -64,13 +64,13 @@ export class Optimade {
         return Optimade.apiVersion(apis);
     }
 
-    async getStructures(providerId: string, filter: string = '', page: number = 0): Promise<Types.ProviderApisResponse[] | null> {
+    async getStructures(providerId: string, filter: string = '', page: number = 0, limit: number = 0): Promise<Types.ProviderApisResponse[] | null> {
 
         if (!this.apis[providerId]) return null;
 
         const apis = this.apis[providerId].filter(api => api.attributes.available_endpoints.includes('structures'));
         const provider = this.providers[providerId];
-        const limit = Math.max(...provider.attributes.query_limits);
+        // const queryLimit = limit || Math.max(...provider.attributes.query_limits);
 
         const structures: Types.StructuresResponse[] = await allSettled(apis.map((api: Types.Api) => {
             const url: string = this.wrapUrl(Optimade.apiVersionUrl(api), filter ? `/structures?filter=${filter}&page_limit=${limit}&page_offset=${limit * page}&page_number=${page}` : `/structures?page_limit=${limit}`);
@@ -80,11 +80,11 @@ export class Optimade {
         return structures.reduce((structures: any[], structure: Types.StructuresResponse | Types.ResponseError): Types.ProviderApisResponse[] => {
             console.log(structure);
 
-            if (structure instanceof Error) {
+            if (structure instanceof Error || Object.keys(structure).includes('errors')) {
                 return structures.concat(structure);
             } else {
                 const { data, meta } = structure;
-                const pages = page === 0 && Math.ceil(meta.data_returned / limit);
+                const pages = Math.ceil(meta.data_returned / (limit || data.length));
                 const api = {
                     data,
                     meta: {
@@ -93,7 +93,7 @@ export class Optimade {
                         returned: meta.data_returned,
                         more: meta.more_data_available,
                         query: meta.query.representation,
-                        limit,
+                        limit: Math.max(...provider.attributes.query_limits),
                         pages
                     }
                 };
@@ -102,13 +102,13 @@ export class Optimade {
         }, []);
     }
 
-    getStructuresAll(providerIds: string[], filter: string = '', page: number = 0, batch: boolean = true): Promise<Promise<Types.StructuresResult>[]> | Promise<Types.StructuresResult>[] {
+    getStructuresAll(providerIds: string[], filter: string = '', page: number = 0, limit: number, batch: boolean = true): Promise<Promise<Types.StructuresResult>[]> | Promise<Types.StructuresResult>[] {
 
         const results = providerIds.reduce((structures: Promise<any>[], providerId: string) => {
             const provider = this.providers[providerId];
             if (provider) {
                 structures.push(allSettled([
-                    this.getStructures(providerId, filter, page),
+                    this.getStructures(providerId, filter, page, limit),
                     Promise.resolve(provider)
                 ]));
             }
