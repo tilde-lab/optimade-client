@@ -114,7 +114,7 @@
                 code.style.color = 'red'
             } else {
                 setSelectPage(apis)
-                inputLimit.placeholder = `Max: ${apis.meta.limit}`
+                inputLimit.placeholder = `Max: ${Math.max(...apis.meta.limit)}`
                 code.innerText = JSON.stringify(apis, 0, 2)
             }
 
