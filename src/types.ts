@@ -20,7 +20,7 @@ export interface Meta {
         prefix: string;
     },
     pages?: number;
-    limit?: number;
+    limits?: number[];
 }
 
 export interface Links {

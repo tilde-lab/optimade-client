@@ -100,7 +100,7 @@ class Optimade {
             }
             else {
                 structure.meta.pages = Math.ceil(structure.meta.data_returned / (limit || structure.data.length));
-                structure.meta.limit = Math.max(...provider.attributes.query_limits);
+                structure.meta.limits = provider.attributes.query_limits;
                 return structures.concat(structure);
             }
         }, []);
