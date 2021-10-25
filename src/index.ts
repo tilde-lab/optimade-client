@@ -100,6 +100,8 @@ export class Optimade {
     getStructuresAll(providerIds: string[], filter: string = '', page: number = 0, limit: number, batch: boolean = true): Promise<Promise<Types.StructuresResponse>[]> | Promise<Types.StructuresResponse>[] {
 
         const results = providerIds.reduce((structures: Promise<any>[], providerId: string) => {
+            console.dir('optimade-client:', structures);
+
             const provider = this.providers[providerId];
             if (provider) {
                 structures.push(allSettled([
