@@ -75,15 +75,15 @@ class Optimade {
         const apis = await Optimade.getJSON(url);
         return Optimade.apiVersion(apis);
     }
-    async getStructures(providerId, filter = '', page = 0, limit) {
+    async getStructures(providerId, filter = '', page = 1, limit) {
         if (!this.apis[providerId])
             return null;
         const apis = this.apis[providerId].filter(api => api.attributes.available_endpoints.includes('structures'));
         const provider = this.providers[providerId];
         const structures = await allSettled(apis.map(async (api) => {
             const pageLimit = limit ? `&page_limit=${limit}` : '';
-            const pageNumber = page ? `&page_number=${page}` : '';
-            const pageOffset = limit && page ? `&page_offset=${limit * page}` : '';
+            const pageNumber = page ? `&page_number=${page - 1}` : '';
+            const pageOffset = limit && page ? `&page_offset=${limit * (page - 1)}` : '';
             const params = filter ? `${pageLimit + pageNumber + pageOffset}` : `?${pageLimit}`;
             const url = this.wrapUrl(Optimade.apiVersionUrl(api), filter ? `/structures?filter=${filter + params}` : `/structures${params}`);
             try {
