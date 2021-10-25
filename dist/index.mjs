@@ -94,7 +94,7 @@ class Optimade {
             }
         }));
         return structures.reduce((structures, structure) => {
-            console.log(structure);
+            console.dir('optimade-client:', structure);
             if (structure instanceof Error || Object.keys(structure).includes('errors')) {
                 return structures.concat(structure);
             }
