@@ -111,7 +111,7 @@
         }
         getStructuresAll(providerIds, filter = '', page = 0, limit, batch = true) {
             const results = providerIds.reduce((structures, providerId) => {
-                console.dir('optimade-client:', structures);
+                console.dir('optimade-client:', providerId + structures);
                 const provider = this.providers[providerId];
                 if (provider) {
                     structures.push(allSettled([
