@@ -85,7 +85,7 @@ export class Optimade {
         }));
 
         return structures.reduce((structures: any[], structure: Types.StructuresResponse | Types.ResponseError): Types.StructuresResponse[] => {
-            console.dir('optimade-client:', providerId + structure);
+            console.dir(`optimade-client:${providerId}`, structure);
 
             if (structure instanceof Error || Object.keys(structure).includes('errors')) {
                 return structures.concat(structure);
