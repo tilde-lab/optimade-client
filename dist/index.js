@@ -85,6 +85,8 @@
             const apis = this.apis[providerId].filter(api => api.attributes.available_endpoints.includes('structures'));
             const provider = this.providers[providerId];
             const structures = await allSettled(apis.map(async (api) => {
+                if (page <= 0)
+                    page = 1;
                 const pageLimit = limit ? `&page_limit=${limit}` : '';
                 const pageNumber = page ? `&page_number=${page - 1}` : '';
                 const pageOffset = limit && page ? `&page_offset=${limit * (page - 1)}` : '';

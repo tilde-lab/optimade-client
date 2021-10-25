@@ -71,6 +71,7 @@ export class Optimade {
         const provider = this.providers[providerId];
 
         const structures: Types.StructuresResponse[] = await allSettled(apis.map(async (api: Types.Api) => {
+            if (page <= 0) page = 1;
             const pageLimit = limit ? `&page_limit=${limit}` : '';
             const pageNumber = page ? `&page_number=${page - 1}` : '';
             const pageOffset = limit && page ? `&page_offset=${limit * (page - 1)}` : '';
