@@ -85,7 +85,7 @@ export class Optimade {
         }));
 
         return structures.reduce((structures: any[], structure: Types.StructuresResponse | Types.ResponseError): Types.StructuresResponse[] => {
-            console.dir('optimade-client:', structure);
+            console.dir('optimade-client:', providerId + structure);
 
             if (structure instanceof Error || Object.keys(structure).includes('errors')) {
                 return structures.concat(structure);
@@ -100,8 +100,6 @@ export class Optimade {
     getStructuresAll(providerIds: string[], filter: string = '', page: number = 0, limit: number, batch: boolean = true): Promise<Promise<Types.StructuresResponse>[]> | Promise<Types.StructuresResponse>[] {
 
         const results = providerIds.reduce((structures: Promise<any>[], providerId: string) => {
-            console.dir('optimade-client:', providerId + structures);
-
             const provider = this.providers[providerId];
             if (provider) {
                 structures.push(allSettled([

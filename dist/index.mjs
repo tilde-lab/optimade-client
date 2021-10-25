@@ -94,7 +94,7 @@ class Optimade {
             }
         }));
         return structures.reduce((structures, structure) => {
-            console.dir('optimade-client:', structure);
+            console.dir('optimade-client:', providerId + structure);
             if (structure instanceof Error || Object.keys(structure).includes('errors')) {
                 return structures.concat(structure);
             }
@@ -107,7 +107,6 @@ class Optimade {
     }
     getStructuresAll(providerIds, filter = '', page = 0, limit, batch = true) {
         const results = providerIds.reduce((structures, providerId) => {
-            console.dir('optimade-client:', providerId + structures);
             const provider = this.providers[providerId];
             if (provider) {
                 structures.push(allSettled([
