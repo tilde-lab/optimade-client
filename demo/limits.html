@@ -114,7 +114,7 @@
                 code.style.color = 'red'
             } else {
                 setSelectPage(apis)
-                inputLimit.placeholder = `Max: ${Math.max(...apis.meta.limit)}`
+                inputLimit.placeholder = `Max: ${Math.max(...apis.meta.limits)}`
                 code.innerText = JSON.stringify(apis, 0, 2)
             }
 
@@ -158,6 +158,7 @@
 
         async function getAllProviders(providers, filter, page) {
             code.innerText = '...loading'
+            code.style.color = 'inherit'
 
             const apis = await getAllProvidersApis(providers, filter, page)
 
