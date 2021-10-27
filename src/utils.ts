@@ -14,7 +14,7 @@ export async function fetchWithTimeout(url, options = {}, timeout = 5000): Promi
 
     try {
         return await fetch(url, { ...options, signal });
-    } catch(err) {
+    } catch (err) {
         if (err.name === 'AbortError') {
             throw new Error('Request timed out');
         }

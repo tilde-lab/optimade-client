@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <style>
+        body {
+            font-family: system-ui;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            padding: 0.5rem;
+            background: whitesmoke;
+            margin: -0.5rem;
+            box-sizing: border-box;
+        }
+
+        nav {
+            display: flex;
+        }
+
+        h1 {
+            margin: 0 0 0.5em;
+        }
+
+        pre {
+            max-width: 100vw;
+            overflow: auto;
+        }
+
+        li {
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Get providers structures by query_limit demo</h1>
+        <nav>
+            <form onsubmit="getProvider(selectProvider.value, inputFilter.value, selectPage.value, inputLimit.value)">
+                <fieldset>
+                    <legend>Select provider</legend>
+                    <input id="filter" placeholder="type formula" />
+                    <input id="limit" onchange="limitting(event)" type="number" size="7" placeholder="set limit" />
+                    <select id="providers" onchange="providering()"></select>
+                    <select id="pages"></select>
+                    <button>get provider</button>
+                </fieldset>
+            </form>
+            <fieldset>
+                <legend>Select all providers</legend>
+                <button onclick="getAllProviders(Object.keys(optimadeClient.providers), inputFilter.value)">get
+                    providers</button>
+            </fieldset>
+
+        </nav>
+    </header>
+    <h2>Result:</h2>
+    <pre>
+        <code>click some button</code>
+    </pre>
+
+    <script type="text/javascript" src="../dist/index.js"></script>
+    <script>
+        "use strict";
+        const optimadeClient = new optimade.Optimade({ corsProxyUrl: 'https://cors.optimade.science' });
+        const inputFilter = document.querySelector('#filter')
+        const inputLimit = document.querySelector('#limit')
+        const selectProvider = document.querySelector('#providers')
+        const selectPage = document.querySelector('#pages')
+        const code = document.querySelector('code')
+        const pre = document.querySelector('pre')
+
+        window.onload = fetch('../dist/prefetched.json').then(response => response.json()).then(prefetched => {
+            optimadeClient.providers = prefetched.providers;
+            optimadeClient.apis = prefetched.apis;
+
+            const providersOptions = Object.keys(optimadeClient.providers).map(p => {
+                const option = document.createElement('option')
+                option.value = p
+                option.innerText = p
+                return option
+            })
+            selectProvider.append(...providersOptions)
+        })
+
+        function providering() {
+            selectPage.innerHTML = ''
+            selectPage.value = ''
+            inputLimit.value = ''
+            inputLimit.placeholder = 'set limit'
+        }
+        function limitting(e) {
+            if (e.target.value <= 0) inputLimit.value = ''
+        }
+        inputFilter.value = 'nelements=2'
+        inputFilter.size = inputFilter.value.length;
+
+
+        let current = 0
+
+        async function getProvider(provider, filter, page, limit) {
+            code.innerText = '...loading'
+            code.style.color = 'inherit'
+
+            const apis = await getProviderApis(provider, filter, page, limit)
+
+            if (apis instanceof Error || Object.keys(apis).includes('errors')) {
+                code.innerText = apis
+                code.style.color = 'red'
+            } else {
+                setSelectPage(apis)
+                inputLimit.placeholder = `Max: ${Math.max(...apis.meta.limits)}`
+                code.innerText = JSON.stringify(apis, 0, 2)
+            }
+
+            function setSelectPage(result) {
+                const calcPages = () => {
+                    const pages = result.meta.pages
+                    return pages === 1 || pages === 0 || pages === Infinity ? 0 : pages
+                }
+                const pages = calcPages()
+
+                if (pages > 0 && current !== pages) {
+                    const pagesOptions = [...Array(pages).keys()].map(p => {
+                        const option = document.createElement('option')
+                        option.value = p
+                        option.innerText = p
+                        return option
+                    })
+                    selectPage.replaceChildren(...pagesOptions)
+                    current = calcPages()
+                }
+            }
+        }
+
+        async function getProviderApis(provider, filter, page, limit) {
+            event.preventDefault()
+
+            const results = await optimadeClient.getStructures(provider, filter, page, limit)
+            console.dir(results);
+
+            const [result] = results
+
+            if (result instanceof Error || Object.keys(result).includes('errors')) {
+                return result
+            } else {
+                const { data, meta } = result
+                const structures = { data: data.length, meta }
+                return structures
+            }
+        }
+
+        async function getAllProviders(providers, filter, page) {
+            code.innerText = '...loading'
+            code.style.color = 'inherit'
+
+            const apis = await getAllProvidersApis(providers, filter, page)
+
+            const ol = document.createElement('ol')
+
+            function addPager(length) {
+                return [...Array(length).keys()].map((a, i) => {
+                    const but = document.createElement('button')
+                    but.innerText = a
+                    but.id = i
+                    return but
+                })
+            }
+
+            const providersList = apis.map(s => {
+                const li = document.createElement('li')
+                if (s.error) {
+                    const { error, provider } = s
+                    li.style.color = 'red'
+                    li.innerText = `{ ${error}, ${JSON.stringify(provider, 0, 2)} }`
+                } else {
+                    li.innerText = JSON.stringify(s, 0, 2)
+                }
+                if (s.apis) {
+                    if (s.apis.some(a => a.data === 0)) li.style.color = 'orange'
+                    // li.append(...addPager(s.apis[0].meta.pages))
+                }
+                return li
+            });
+            ol.replaceChildren(...providersList)
+            code.replaceChildren(ol)
+        }
+
+        async function getAllProvidersApis(providers, filter) {
+
+            const results = await optimadeClient.getStructuresAll(providers, filter)
+            console.dir(results);
+
+            return results.map(result => {
+                if (result[0].some(r => r instanceof Error)) {
+                    const [[error], provider] = result
+                    return { error, provider }
+                } else {
+                    const [[{ data, meta }], provider] = result
+                    return {
+                        apis: [{ data: data.length, meta }],
+                        provider
+                    }
+                }
+            })
+        }
+
+    </script>
+</body>
+
+</html>
