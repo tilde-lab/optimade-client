@@ -63,7 +63,7 @@ export class Optimade {
         return Optimade.apiVersion(apis);
     }
 
-    async getStructures(providerId: string, filter: string = '', page: number = 1, limit: number): Promise<Types.StructuresResponse[] | null> {
+    async getStructures(providerId: string, filter: string = '', page: number = 1, limit: number): Promise<Types.StructuresResponse[] | Types.ResponseError> {
 
         if (!this.apis[providerId]) return null;
 
@@ -98,7 +98,7 @@ export class Optimade {
         }, []);
     }
 
-    getStructuresAll(providerIds: string[], filter: string = '', page: number = 0, limit: number, batch: boolean = true): Promise<Promise<Types.StructuresResponse>[]> | Promise<Types.StructuresResponse>[] {
+    getStructuresAll(providerIds: string[], filter: string = '', page: number = 0, limit: number, batch: boolean = true): Promise<Promise<Types.StructuresResult>[]> | Promise<Types.StructuresResult>[] {
 
         const results = providerIds.reduce((structures: Promise<any>[], providerId: string) => {
             const provider = this.providers[providerId];

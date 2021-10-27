@@ -70,18 +70,6 @@ export interface Structure {
         [key: string]: any;
     };
 }
-export interface ProviderApisResponse {
-    data: Structure[];
-    meta?: {
-        version: string;
-        available: number;
-        returned: number;
-        more: boolean;
-        query: string;
-        limit: number;
-        pages: number;
-    };
-}
 export interface ProvidersResponse {
     data: Provider[];
     meta?: Meta;
@@ -112,7 +100,7 @@ export interface ErrorObject {
     length?: string;
 }
 export interface ErrorResponse {
-    errors: any;
+    errors: ErrorObject;
     meta: any;
 }
 export declare type ProvidersMap = {
@@ -121,4 +109,4 @@ export declare type ProvidersMap = {
 export declare type ApisMap = {
     [key: string]: Api[];
 };
-export declare type StructuresResult = [Promise<ProviderApisResponse[]>, Promise<Provider>][];
+export declare type StructuresResult = [Promise<StructuresResponse[]>, Promise<Provider>][];
