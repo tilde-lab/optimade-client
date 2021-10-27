@@ -40,7 +40,7 @@ If you are **not** using ES6 or CDN, add to your HTML just before closing the
 
 ```ts
 const optimadeClient = new Optimade({
-  providersUrl: "/path/to/optimade/providers.json",
+  providersUrl: "https://providers.optimade.org/providers.json",
 });
 
 console.log(optimadeClient.providers); // { [id: string]: Provider }[]
@@ -65,7 +65,7 @@ suited for the server environment.
 import prefetched from 'optimade/dist/prefetched.json';
 
 const optimadeClient = new Optimade({
-  providersUrl: "/path/to/optimade/providers.json",
+  providersUrl: "https://providers.optimade.org/providers.json",
 });
 
 optimadeClient.providers = prefetched.providers;
