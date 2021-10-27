@@ -18,7 +18,9 @@ export interface Meta {
         name: string;
         description: string;
         prefix: string;
-    };
+    },
+    pages?: number;
+    limits?: number[];
 }
 
 export interface Links {
@@ -38,8 +40,8 @@ export interface ApiVer {
 }
 
 export interface Api {
-    type: string;
     id: string;
+    type: string;
     attributes: {
         api_version: string;
         available_api_versions: ApiVer | ApiVer[];
@@ -58,6 +60,7 @@ export interface Provider {
         base_url: string | null;
         homepage?: string | null;
         link_type?: string;
+        query_limits?: number[];
     };
 }
 
@@ -87,7 +90,7 @@ export interface InfoResponse {
 }
 
 export interface StructuresResponse {
-    data: Structure[];
+    data?: Structure[];
     links?: Links;
     meta?: Meta;
 }
@@ -102,7 +105,18 @@ export interface ResponseError extends Error {
     response?: any;
 }
 
-export type ProvidersMap = { [key: string]: Provider }
-export type ApisMap = { [key: string]: Api[] }
+export interface ErrorObject {
+    status: string;
+    title: string;
+    detail?: string;
+    length?: string;
+}
+export interface ErrorResponse {
+    errors: ErrorObject;
+    meta: any;
+}
 
-export type StructuresResult = [Promise<Structure>, Promise<Provider>][];
+export type ProvidersMap = { [key: string]: Provider; };
+export type ApisMap = { [key: string]: Api[]; };
+
+export type StructuresResult = [Promise<StructuresResponse[]>, Promise<Provider>][];
