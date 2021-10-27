@@ -36,6 +36,14 @@ If you are **not** using ES6 or CDN, add to your HTML just before closing the
 
 ## Usage
 
+The code is generally isomorphic, however one should additionally take care of
+downloading the cache or setting the CORS policy for the browsers. Concerning
+the CORS, the `Optimade` class constructor accepts the `corsProxyUrl` parameter,
+pointing to a running `cors-anywhere` proxy instance. This will be valid
+until all the Optimade providers are supplying the header
+`Access-Control-Allow-Origin $http_origin` in their responses. For the
+server-side environment this is not required.
+
 ### Discovery and querying
 
 ```ts
@@ -80,14 +88,6 @@ const results = await optimadeClient.getStructuresAll(
 ```
 
 See also the `demo` folder.
-
-The code is generally isomorphic, however one should additionally take care of
-downloading the cache or setting the CORS policy for the browsers. Concerning
-the CORS, the `Optimade` class constructor accepts the `corsProxyUrl` parameter,
-pointing to a running `cors-anywhere` proxy instance. This will be valid
-until all the Optimade providers are supplying the header
-`Access-Control-Allow-Origin $http_origin` in their responses. For the
-server-side environment this is not required.
 
 ## License
 
