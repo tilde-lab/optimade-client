@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-
 <head>
     <meta charset="utf-8" />
     <style>
@@ -38,7 +37,7 @@
 
 <body>
     <header>
-        <h1>Get providers structures by query_limit demo</h1>
+        <h1>Get providers structures by <i>query_limit</i> demo</h1>
         <nav>
             <form onsubmit="getProvider(selectProvider.value, inputFilter.value, selectPage.value, inputLimit.value)">
                 <fieldset>
@@ -65,8 +64,8 @@
 
     <script type="text/javascript" src="../dist/index.js"></script>
     <script>
-        "use strict";
-        const optimadeClient = new optimade.Optimade({ corsProxyUrl: 'https://cors.optimade.science' });
+        "use strict"
+        const optimadeClient = new optimade.Optimade({ corsProxyUrl: 'https://cors.optimade.science' })
         const inputFilter = document.querySelector('#filter')
         const inputLimit = document.querySelector('#limit')
         const selectProvider = document.querySelector('#providers')
@@ -75,8 +74,8 @@
         const pre = document.querySelector('pre')
 
         window.onload = fetch('../dist/prefetched.json').then(response => response.json()).then(prefetched => {
-            optimadeClient.providers = prefetched.providers;
-            optimadeClient.apis = prefetched.apis;
+            optimadeClient.providers = prefetched.providers
+            optimadeClient.apis = prefetched.apis
 
             const providersOptions = Object.keys(optimadeClient.providers).map(p => {
                 const option = document.createElement('option')
@@ -96,14 +95,14 @@
         function limitting(e) {
             if (e.target.value <= 0) inputLimit.value = ''
         }
-        inputFilter.value = 'nelements=2'
+        inputFilter.value = 'nelements=1'
         inputFilter.size = inputFilter.value.length;
 
 
         let current = 0
 
         async function getProvider(provider, filter, page, limit) {
-            code.innerText = '...loading'
+            code.innerText = 'loading...'
             code.style.color = 'inherit'
 
             const apis = await getProviderApis(provider, filter, page, limit)
@@ -141,7 +140,7 @@
             event.preventDefault()
 
             const results = await optimadeClient.getStructures(provider, filter, page, limit)
-            console.dir(results);
+            console.dir(results)
 
             const [result] = results
 
@@ -155,7 +154,7 @@
         }
 
         async function getAllProviders(providers, filter, page) {
-            code.innerText = '...loading'
+            code.innerText = 'loading...'
             code.style.color = 'inherit'
 
             const apis = await getAllProvidersApis(providers, filter, page)
@@ -193,7 +192,7 @@
         async function getAllProvidersApis(providers, filter) {
 
             const results = await optimadeClient.getStructuresAll(providers, filter)
-            console.dir(results);
+            console.dir(results)
 
             return results.map(result => {
                 if (result[0].some(r => r instanceof Error)) {
@@ -211,5 +210,4 @@
 
     </script>
 </body>
-
 </html>
