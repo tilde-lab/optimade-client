@@ -88,7 +88,6 @@
         })
 
         function providering() {
-            console.log(selectProvider.value)
             selectPage.innerHTML = ''
             selectPage.value = ''
             inputLimit.value = ''
@@ -124,7 +123,6 @@
                     return pages === 1 || pages === 0 || pages === Infinity ? 0 : pages
                 }
                 const pages = calcPages()
-                console.log(pages)
 
                 if (pages > 0 && current !== pages) {
                     const pagesOptions = [...Array(pages).keys()].map(p => {
@@ -174,7 +172,6 @@
             }
 
             const providersList = apis.map(s => {
-                console.log(s)
                 const li = document.createElement('li')
                 if (s.error) {
                     const { error, provider } = s
