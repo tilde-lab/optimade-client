@@ -1,5 +1,4 @@
 /node_modules/
-/dist/
 /cypress/screenshots/
 .DS_Store
 .idea/

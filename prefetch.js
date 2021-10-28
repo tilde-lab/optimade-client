@@ -35,7 +35,7 @@ optimade.getProviders().then(async () => {
 			try {
 				const res = await fetch(url).then(res => res.json());
 				const api = res.meta && res.meta.api_version;
-				console.dir(res);
+				//console.dir(res);
 				const detail = (e) => {
 					return e
 						? e.length
@@ -59,8 +59,8 @@ optimade.getProviders().then(async () => {
 			return { ...acc, ...provider };
 		}, Promise.resolve({}));
 
-		const log = { prefetched: Object.keys(providers).length, source: Object.keys(source).length };
-		console.log(log);
+		//const log = { prefetched: Object.keys(providers).length, source: Object.keys(source).length };
+		//console.log(log);
 
 		return providers;
 	}
