@@ -92,7 +92,7 @@ export class Optimade {
                 return structures.concat(structure);
             } else {
                 structure.meta.pages = Math.ceil(structure.meta.data_returned / (limit || structure.data.length));
-                structure.meta.limits = provider.attributes.query_limits;
+                structure.meta.limits = provider.attributes.query_limits || [10];
                 return structures.concat(structure);
             }
         }, []);
