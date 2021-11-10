@@ -1,6 +1,10 @@
-# optimade changelog
+# Optimade changelog
 
-## 2.0
+## 2.0.3
+
+- Bugfix release
+
+## 2.0.0
 
 - Add new `npm run prefetch` logic in prefetch.js to check provider avialability,
   cache provider pagination limits in `provider.attributes.query_limits`,
