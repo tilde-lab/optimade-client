@@ -61,6 +61,7 @@ export interface Provider {
         homepage?: string | null;
         link_type?: string;
         query_limits?: number[];
+        api_version?: string;
     };
 }
 
