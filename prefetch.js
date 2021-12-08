@@ -34,7 +34,7 @@ optimade.getProviders().then(async () => {
 			const url = `${v.attributes.base_url}/v1/structures?filter=${formula}&page_limit=${max}`;
 			try {
 				const res = await fetch(url).then(res => res.json());
-				const api = res.meta && res.meta.api_version;
+				const api = res.meta && res.meta.api_version || apis[k][0].attributes.api_version;
 				//console.dir(res);
 				const detail = (e) => {
 					return e
