@@ -98,7 +98,7 @@ export class Optimade {
         }, []);
     }
 
-    getStructuresAll(providerIds: string[], filter: string = '', page: number = 0, limit: number, batch: boolean = true): Promise<Promise<Types.StructuresResult>[]> | Promise<Types.StructuresResult>[] {
+    getStructuresAll(providerIds: string[], filter: string = '', page: number = 1, limit: number, batch: boolean = true): Promise<Promise<Types.StructuresResult>[]> | Promise<Types.StructuresResult>[] {
 
         const results = providerIds.reduce((structures: Promise<any>[], providerId: string) => {
             const provider = this.providers[providerId];
