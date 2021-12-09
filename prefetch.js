@@ -44,10 +44,9 @@ optimade.getProviders().then(async () => {
 						: '0';
 				};
 				const nums = detail(res.errors).match(/\d+/g).filter(n => +n < max).map(n => +n);
-				if (!nums.includes(0))
-					return {
-						[k]: { ...v, attributes: { ...v.attributes, api_version: api, ['query_limits']: nums } }
-					};
+				return {
+					[k]: { ...v, attributes: { ...v.attributes, api_version: api, ['query_limits']: !nums.includes(0) ? nums : [10] } }
+				};
 			} catch (error) {
 				console.log(error);
 			}
@@ -59,8 +58,8 @@ optimade.getProviders().then(async () => {
 			return { ...acc, ...provider };
 		}, Promise.resolve({}));
 
-		//const log = { prefetched: Object.keys(providers).length, source: Object.keys(source).length };
-		//console.log(log);
+		const log = { prefetched: Object.keys(providers).length, source: Object.keys(source).length };
+		console.log(log);
 
 		return providers;
 	}
