@@ -14,20 +14,32 @@ const optimade = new Optimade({
 	providersUrl: 'https://providers.optimade.org/providers.json'
 });
 
-optimade.getProviders().then(async () => {
+let time = performance.now(),
+	alltime = performance.now(),
+	filter = process.env.filter;
+//  || 'oqmd, jarvis';
+
+optimade.getProviders().then(async (providers) => {
+
+	console.warn('providers fetched from source', performance.now() - time);
+	time = performance.now();
 
 	const filteredApis = Object.entries(optimade.apis).filter(([k, v]) => v.length);
 	const apis = filteredApis.sort().reduce((acc, [k, v]) => {
 		return { ...acc, ...{ [k]: v } };
 	}, {});
 
-	const source = Object.keys(optimade.providers).sort().reduce(
+	const source = Object.keys(providers).sort().reduce(
 		(obj, key) => {
-			obj[key] = optimade.providers[key];
+			obj[key] = providers[key];
 			return obj;
 		}, {});
 
-	async function getQueryLimits(providers, max = 1000) {
+	console.warn('providers sorted', performance.now() - time);
+
+	async function getQueryLimits(providers, filter = '', max = 1000) {
+
+		providers = Object.fromEntries(Object.entries(providers).filter(([key]) => !filter.includes(key)));
 
 		const fetchLimits = async (k, v) => {
 			const formula = `chemical_formula_anonymous="A2B"`;
@@ -51,21 +63,26 @@ optimade.getProviders().then(async () => {
 				console.log(error);
 			}
 		};
-
-		providers = await Object.entries(providers).reduce(async (promise, [k, v]) => {
+		time = performance.now();
+		return await Object.entries(providers).reduce(async (promise, [k, v], i) => {
 			const provider = await fetchLimits(k, v);
 			const acc = await promise;
+			console.log(i, provider);
 			return { ...acc, ...provider };
 		}, Promise.resolve({}));
-
-		const log = { prefetched: Object.keys(providers).length, source: Object.keys(source).length };
-		console.log(log);
-
-		return providers;
 	}
 
-	getQueryLimits(source).then(providers => {
+	getQueryLimits(source, filter).then(providers => {
 		const data = { providers, apis };
+
+		console.warn('limits fetched', performance.now() - time);
+
+		console.log({
+			prefetched: Object.keys(providers).length,
+			source: Object.keys(source).length,
+			alltime: performance.now() - alltime
+		});
+
 		fs.writeFile(path.join(__dirname, 'dist/prefetched.json'), JSON.stringify(data), (err) => {
 			if (err) throw err;
 			console.log('The prefetched.json file has been saved!');
