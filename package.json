@@ -28,5 +28,10 @@
   "dependencies": {
     "isomorphic-unfetch": "^3.1.0",
     "node-abort-controller": "^3.0.1"
-  }
+  },
+  "keywords": ["optimade", "materials"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tilde-lab/optimade-client"
+   }
 }
