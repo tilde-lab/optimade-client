@@ -15,6 +15,56 @@ export class Optimade {
         this.providersUrl = this.wrapUrl(providersUrl);
     }
 
+    async addProvider(provider: Types.Provider) {
+        if (!this.apis[provider.id]) this.apis[provider.id] = [];
+
+        try {
+            const ver = provider.attributes
+                && provider.attributes.api_version ?
+                provider.attributes.api_version.charAt(0) : '';
+            const api = await this.getApis(provider, ver ? `v${ver}` : '');
+
+            if (api.attributes.available_endpoints.includes('structures')) {
+                this.apis[provider.id].push(api);
+            }
+
+        } catch (ignore) { }
+
+        if (!provider.attributes.query_limits) {
+            const formula = `chemical_formula_anonymous="A2B"`;
+            const url = `${provider.attributes.base_url}/v1/structures?filter=${formula}&page_limit=1000`;
+
+            try {
+                const res = await fetch(url).then(res => res.json());
+                const version = res.meta && res.meta.api_version || this.apis[provider.id][0].attributes.api_version;
+                const detail = (errors: { detail: any; }[]) => {
+                    return errors
+                        ? errors.length
+                            ? errors[0].detail
+                            : errors.detail
+                        : '10';
+                };
+                const limits = detail(res.errors)
+                    .match(/\d+/g)
+                    .filter((number: string) => +number < 1000)
+                    .map((number: string) => +number);
+
+                provider.attributes = {
+                    ...provider.attributes,
+                    api_version: version,
+                    query_limits: limits
+                }
+
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+        this.providers[provider.id] = provider
+
+        return this.providers;
+    }
+
     async getProviders(api?: Types.Api): Promise<Types.ProvidersMap | null> {
         const providers: Types.ProvidersResponse | null = await (api ?
             this.followLinks(api).catch(() => null) :
