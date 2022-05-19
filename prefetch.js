@@ -16,7 +16,7 @@ const optimade = new Optimade({
 
 let time = performance.now(),
 	alltime = performance.now(),
-	filter = process.env.filter;
+	skip = process.env.SKIP;
 //  || 'oqmd, jarvis';
 
 optimade.getProviders().then(async (providers) => {
@@ -37,9 +37,9 @@ optimade.getProviders().then(async (providers) => {
 
 	console.warn('providers sorted', performance.now() - time);
 
-	async function getQueryLimits(providers, filter = '', max = 1000) {
+	async function getQueryLimits(providers, skip = '', max = 1000) {
 
-		providers = Object.fromEntries(Object.entries(providers).filter(([key]) => !filter.includes(key)));
+		providers = Object.fromEntries(Object.entries(providers).filter(([key]) => !skip.includes(key)));
 
 		const fetchLimits = async (k, v) => {
 			const formula = `chemical_formula_anonymous="A2B"`;
@@ -72,7 +72,7 @@ optimade.getProviders().then(async (providers) => {
 		}, Promise.resolve({}));
 	}
 
-	getQueryLimits(source, filter).then(providers => {
+	getQueryLimits(source, skip).then(providers => {
 		const data = { providers, apis };
 
 		console.warn('limits fetched', performance.now() - time);
