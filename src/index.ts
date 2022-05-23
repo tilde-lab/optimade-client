@@ -1,11 +1,12 @@
 import { allSettled, fetchWithTimeout } from './utils';
+import { version } from '../package.json'
 
 import type * as Types from './types';
 export { Types };
 
 export class Optimade {
-    private providersUrl: string = '';
-    private corsProxyUrl: string = '';
+    private providersUrl = '';
+    private corsProxyUrl = '';
     providers: Types.ProvidersMap | null = null;
     apis: Types.ApisMap = {};
     private reqStack: string[] = [];
@@ -16,7 +17,7 @@ export class Optimade {
     }
 
     async addProvider(provider: Types.Provider) {
-        if (!this.apis[provider.id]) this.apis[provider.id] = [];
+        if (!this.apis[provider.id]) { this.apis[provider.id] = []; }
 
         try {
             const ver = provider.attributes
@@ -28,7 +29,7 @@ export class Optimade {
                 this.apis[provider.id].push(api);
             }
 
-        } catch (ignore) { }
+        } catch (ignore) { console.log(ignore) }
 
         if (!provider.attributes.query_limits) {
             const formula = `chemical_formula_anonymous="A2B"`;
@@ -37,7 +38,7 @@ export class Optimade {
             try {
                 const res = await fetch(url).then(res => res.json());
                 const version = res.meta && res.meta.api_version || this.apis[provider.id][0].attributes.api_version;
-                const detail = (errors: { detail: any; }[]) => {
+                const detail = (errors) => {
                     return errors
                         ? errors.length
                             ? errors[0].detail
@@ -71,18 +72,18 @@ export class Optimade {
             Optimade.getJSON(this.providersUrl).catch(() => null)
         );
 
-        if (!providers) return null;
-        if (!this.providers) this.providers = {};
+        if (!providers) { return null; }
+        if (!this.providers) { this.providers = {}; }
 
         const data = providers.data.filter(Optimade.isProviderValid);
         const ver = providers.meta && providers.meta.api_version ?
             providers.meta.api_version.charAt(0) : '';
 
         for (const provider of data) {
-            if (!this.apis[provider.id]) this.apis[provider.id] = [];
+            if (!this.apis[provider.id]) { this.apis[provider.id] = []; }
             try {
                 const api = await this.getApis(provider, ver ? `v${ver}` : '');
-                if (!api) continue;
+                if (!api) { continue; }
 
                 if (api.attributes.available_endpoints.includes('structures')) {
                     this.apis[provider.id].push(api);
@@ -92,36 +93,36 @@ export class Optimade {
                 } else {
                     await this.getProviders(api);
                 }
-            } catch (ignore) { }
+            } catch (ignore) { console.log(ignore) }
         }
 
         return this.providers;
     }
 
-    async getApis(provider: Types.Provider | string, version: string = ''): Promise<Types.Api | null> {
+    async getApis(provider: Types.Provider | string, version = ''): Promise<Types.Api | null> {
         if (typeof provider === 'string') {
             provider = this.providers[provider];
         }
 
-        if (!provider) throw new Error('No provider found');
+        if (!provider) { throw new Error('No provider found'); }
 
         const url: string = this.wrapUrl(`${provider.attributes.base_url}/${version}`, '/info');
 
-        if (this.isDuplicatedReq(url)) return null;
+        if (this.isDuplicatedReq(url)) { return null; }
 
         const apis: Types.InfoResponse = await Optimade.getJSON(url);
         return Optimade.apiVersion(apis);
     }
 
-    async getStructures(providerId: string, filter: string = '', page: number = 1, limit: number): Promise<Types.StructuresResponse[] | Types.ResponseError> {
+    async getStructures(providerId: string, filter = '', page = 1, limit: number): Promise<Types.StructuresResponse[] | Types.ResponseError> {
 
-        if (!this.apis[providerId]) return null;
+        if (!this.apis[providerId]) { return null; }
 
         const apis = this.apis[providerId].filter(api => api.attributes.available_endpoints.includes('structures'));
         const provider = this.providers[providerId];
 
         const structures: Types.StructuresResponse[] = await allSettled(apis.map(async (api: Types.Api) => {
-            if (page <= 0) page = 1;
+            if (page <= 0) { page = 1; }
             const pageLimit = limit ? `&page_limit=${limit}` : '';
             const pageNumber = page ? `&page_number=${page - 1}` : '';
             const pageOffset = limit && page ? `&page_offset=${limit * (page - 1)}` : '';
@@ -148,7 +149,7 @@ export class Optimade {
         }, []);
     }
 
-    getStructuresAll(providerIds: string[], filter: string = '', page: number = 1, limit: number, batch: boolean = true): Promise<Promise<Types.StructuresResult>[]> | Promise<Types.StructuresResult>[] {
+    getStructuresAll(providerIds: string[], filter = '', page = 1, limit: number, batch = true): Promise<Promise<Types.StructuresResult>[]> | Promise<Types.StructuresResult>[] {
 
         const results = providerIds.reduce((structures: Promise<any>[], providerId: string) => {
             const provider = this.providers[providerId];
@@ -165,7 +166,7 @@ export class Optimade {
     }
 
     private async followLinks(api: Types.Api): Promise<Types.LinksResponse | null> {
-        if (!api.attributes.available_endpoints.includes('links')) return null;
+        if (!api.attributes.available_endpoints.includes('links')) { return null; }
 
         const url = this.wrapUrl(Optimade.apiVersionUrl(api), '/links');
 
@@ -181,7 +182,7 @@ export class Optimade {
         return this.reqStack.includes(url) || !this.reqStack.unshift(url);
     }
 
-    static async getJSON(uri: string, params: {} = null, headers: {} = {}) {
+    static async getJSON(uri: string, params = null, headers = {}) {
 
         const url = new URL(uri);
         const timeout = 10000;
@@ -189,6 +190,8 @@ export class Optimade {
         if (params) {
             Object.entries(params).forEach((param: [string, any]) => url.searchParams.append(...param));
         }
+
+        Object.assign(headers, { 'User-Agent': `tilde-lab-optimade-client/${version}` })
 
         const res = await fetchWithTimeout(url.toString(), { headers }, timeout);
 
