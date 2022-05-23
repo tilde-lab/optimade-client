@@ -1,4 +1,7 @@
+/* jshint esversion: 6 */
+
 import typescript from 'rollup-plugin-typescript2';
+import json from '@rollup/plugin-json';
 
 import pkg from './package.json';
 
@@ -14,5 +17,6 @@ export default {
     ],
     plugins: [
         typescript(),
+        json(),
     ],
 };

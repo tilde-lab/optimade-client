@@ -46,7 +46,7 @@ export interface Api {
         api_version: string;
         available_api_versions: ApiVer | ApiVer[];
         available_endpoints: string[];
-        entry_types_by_format: {};
+        entry_types_by_format: Record<string, unknown>;
         formats: string[];
     };
 }

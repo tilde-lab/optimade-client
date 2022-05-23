@@ -11,6 +11,7 @@
         "noImplicitReturns": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
+        "resolveJsonModule": true,
         "removeComments": true,
         "noLib": false,
         "moduleResolution": "node",
