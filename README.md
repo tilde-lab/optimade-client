@@ -84,7 +84,8 @@ const results = await optimadeClient.getStructuresAll({
   filter: YOUR_OPTIMADE_QUERY,
   page: number,
   limit: number,
-  offset: number
+  offset: number,
+  batch: true
 }); // [StructuresResponse[], Provider][]
 ```
 
