@@ -57,10 +57,10 @@ const providersMap = await optimadeClient.getProviders(); // { [id: string]: Pro
 
 const providerIds = Object.keys(providersMap); // string[]
 
-const results = await optimadeClient.getStructuresAll(
-  providerIds,
-  YOUR_OPTIMADE_QUERY,
-); // [StructuresResponse[], Provider][]
+const results = await optimadeClient.getStructuresAll({
+  providers: Provider[],
+  filter: YOUR_OPTIMADE_QUERY,
+}); // [StructuresResponse[], Provider][]
 ```
 
 Importing depends on your environment. See also the `examples` folder. The
@@ -79,12 +79,14 @@ const optimadeClient = new Optimade({
 optimadeClient.providers = prefetched.providers;
 optimadeClient.apis = prefetched.apis;
 
-const results = await optimadeClient.getStructuresAll(
-  providerIds,
-  YOUR_OPTIMADE_QUERY,
+const results = await optimadeClient.getStructuresAll({
+  providers: Provider[],
+  filter: YOUR_OPTIMADE_QUERY,
   page: number,
-  limit: number
-); // [StructuresResponse[], Provider][]
+  limit: number,
+  offset: number,
+  batch: true
+}); // [StructuresResponse[], Provider][]
 ```
 
 See also the `demo` folder.

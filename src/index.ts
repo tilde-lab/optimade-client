@@ -114,7 +114,7 @@ export class Optimade {
         return Optimade.apiVersion(apis);
     }
 
-    async getStructures(providerId: string, filter = '', page = 1, limit: number): Promise<Types.StructuresResponse[] | Types.ResponseError> {
+    async getStructures({ providerId, filter, page, limit, offset }: { providerId: string; filter: string; page: number; limit: number; offset: number; }): Promise<Types.StructuresResponse[] | Types.ResponseError> {
 
         if (!this.apis[providerId]) { return null; }
 
@@ -122,12 +122,11 @@ export class Optimade {
         const provider = this.providers[providerId];
 
         const structures: Types.StructuresResponse[] = await allSettled(apis.map(async (api: Types.Api) => {
-            if (page <= 0) { page = 1; }
             const pageLimit = limit ? `&page_limit=${limit}` : '';
-            const pageNumber = page ? `&page_number=${page - 1}` : '';
-            const pageOffset = limit && page ? `&page_offset=${limit * (page - 1)}` : '';
+            const pageNumber = page ? `&page_number=${page}` : '';
+            const pageOffset = offset ? `&page_offset=${offset}` : '';
             const params = filter ? `${pageLimit + pageNumber + pageOffset}` : `?${pageLimit}`;
-            const url: string = this.wrapUrl(Optimade.apiVersionUrl(api), filter ? `/structures?filter=${filter + params}` : `/structures${params}`);
+            const url = this.wrapUrl(Optimade.apiVersionUrl(api), filter ? `/structures?filter=${filter + params}` : `/structures${params}`);
 
             try {
                 return await Optimade.getJSON(url, {}, { Origin: 'https://cors.optimade.science', 'X-Requested-With': 'XMLHttpRequest' });
@@ -149,13 +148,13 @@ export class Optimade {
         }, []);
     }
 
-    getStructuresAll(providerIds: string[], filter = '', page = 1, limit: number, batch = true): Promise<Promise<Types.StructuresResult>[]> | Promise<Types.StructuresResult>[] {
+    getStructuresAll({ providers, filter, page, limit, offset, batch = true }: { providers: string[]; filter: string; page: number; limit: number; offset: number; batch?: boolean; }): Promise<Promise<Types.StructuresResult>[]> | Promise<Types.StructuresResult>[] {
 
-        const results = providerIds.reduce((structures: Promise<any>[], providerId: string) => {
+        const results = providers.reduce((structures: Promise<any>[], providerId: string) => {
             const provider = this.providers[providerId];
             if (provider) {
                 structures.push(allSettled([
-                    this.getStructures(providerId, filter, page, limit),
+                    this.getStructures({ providerId, filter, page, limit, offset }),
                     Promise.resolve(provider)
                 ]));
             }
@@ -173,7 +172,7 @@ export class Optimade {
         return !this.isDuplicatedReq(url) ? Optimade.getJSON(url) : null;
     }
 
-    private wrapUrl(url, tail = '') {
+    private wrapUrl(url: string, tail = ''): string {
         url = this.corsProxyUrl ? `${this.corsProxyUrl}/${url.replace('://', '/').replace('//', '/')}` : url;
         return tail ? url.replace(/\/$/, '') + tail : url;
     }
