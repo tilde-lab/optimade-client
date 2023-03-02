@@ -3,6 +3,7 @@
 [![NPM version](https://img.shields.io/npm/v/optimade.svg?style=flat)](https://www.npmjs.com/package/optimade)
 [![NPM downloads](https://img.shields.io/npm/dm/optimade.svg?style=flat)](https://www.npmjs.com/package/optimade)
 [![GitHub issues](https://img.shields.io/github/issues/tilde-lab/optimade-client?style=flat)](https://github.com/tilde-lab/optimade-client/issues)
+[![DOI](https://zenodo.org/badge/317343954.svg)](https://doi.org/10.5281/zenodo.7693400)
 
 ## Features
 
