@@ -190,7 +190,7 @@ export class Optimade {
             Object.entries(params).forEach((param: [string, any]) => url.searchParams.append(...param));
         }
 
-        Object.assign(headers, { 'User-Agent': `tilde-lab-optimade-client/${version}` })
+        Object.assign(headers, { 'User-Agent': `tilde-lab-optimade-client/${version}` });
 
         const res = await fetchWithTimeout(url.toString(), { headers }, timeout);
 

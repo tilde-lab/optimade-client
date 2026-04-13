@@ -55,19 +55,24 @@ optimade.getProviders().then(async (providers) => {
 							: e.detail
 						: '0';
 				};
+
+				// take care of the pagination for GUIs
 				const nums = detail(res.errors).match(/\d+/g).filter(n => +n < max).map(n => +n);
 				return {
 					[k]: { ...v, attributes: { ...v.attributes, api_version: api, ['query_limits']: !nums.includes(0) ? nums : [10] } }
 				};
 			} catch (error) {
-				console.log(error);
+				console.error(error);
 			}
 		};
 		time = performance.now();
 		return await Object.entries(providers).reduce(async (promise, [k, v], i) => {
 			const provider = await fetchLimits(k, v);
 			const acc = await promise;
-			console.log(i, provider);
+
+			console.log(`Provider number ${i}:`);
+			console.log(JSON.stringify(provider, null, 4));
+
 			return { ...acc, ...provider };
 		}, Promise.resolve({}));
 	}
@@ -80,7 +85,7 @@ optimade.getProviders().then(async (providers) => {
 		console.log({
 			prefetched: Object.keys(providers).length,
 			source: Object.keys(source).length,
-			alltime: performance.now() - alltime
+			time: performance.now() - alltime
 		});
 
 		fs.writeFile(path.join(__dirname, 'dist/prefetched.json'), JSON.stringify(data), (err) => {
