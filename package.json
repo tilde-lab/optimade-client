@@ -23,14 +23,13 @@
     "@types/jest": "^26.0.15",
     "jest": "^26.6.0",
     "rollup": "^2.47.0",
-    "rollup-plugin-typescript2": "^0.28.0",
+    "rollup-plugin-typescript2": "^0.37.0",
     "ts-jest": "^26.4.1",
     "eslint": "^8.16.0",
     "typescript": "^4.0.3"
   },
   "dependencies": {
-    "isomorphic-unfetch": "^3.1.0",
-    "node-abort-controller": "^3.0.1"
+    "isomorphic-unfetch": "^3.1.0"
   },
   "keywords": [
     "optimade",
