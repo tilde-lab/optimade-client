@@ -55,7 +55,6 @@ optimade.getProviders().then(async (providers) => {
 							: e.detail
 						: '0';
 				};
-
 				// take care of the pagination for GUIs
 				const nums = detail(res.errors).match(/\d+/g).filter(n => +n < max).map(n => +n);
 				return {
@@ -70,7 +69,7 @@ optimade.getProviders().then(async (providers) => {
 			const provider = await fetchLimits(k, v);
 			const acc = await promise;
 
-			console.log(`Provider number ${i}:`);
+			console.log(`Provider # ${i}:`);
 			console.log(JSON.stringify(provider, null, 4));
 
 			return { ...acc, ...provider };
@@ -92,9 +91,9 @@ optimade.getProviders().then(async (providers) => {
 			if (err) throw err;
 			console.log('The prefetched.json file has been saved!');
 		});
-		fs.writeFile(path.join(__dirname, 'dist/providers.json'), JSON.stringify(source), (err) => {
+		fs.writeFile(path.join(__dirname, 'dist/providers.debug.json'), JSON.stringify(source), (err) => {
 			if (err) throw err;
-			console.log('The providers.json file has been saved!');
+			console.log('The providers.debug.json file has been saved!');
 		});
 	});
 

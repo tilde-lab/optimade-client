@@ -1,5 +1,9 @@
 # Optimade changelog
 
+## 2.1.1
+
+- Rename `providers.json` to `providers.debug.json` (since not used directly, just for debugging)
+
 ## 2.0.3
 
 - Bugfix release
@@ -8,7 +12,7 @@
 
 - Add new `npm run prefetch` logic in prefetch.js to check provider avialability,
   cache provider pagination limits in `provider.attributes.query_limits`,
-  introduce the sorted and structured providers.json (as source) and prefetched.json (as cache)
+  introduce the sorted and structured `providers.json` (as source) and `prefetched.json` (as cache)
 - Add new arguments `getStructures(providerId, filter, page, limit)` for pagination
   and pagination limits
 - Add new logic for catching errors like
